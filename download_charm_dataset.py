@@ -27,5 +27,5 @@ if (__name__ == "__main__"):
 	url_write_name_list = ["CLEAR", "LTE_1M", "LTE_FLOOD", "LTE_PINGs300", "LTE_ZT", "WIFI_1M", 
 	"WIFI_FLOOD", "WIFI_PINGs300", "WIFI_ZT"]
 
-	r = requests.get(url_base+url_list[args.id_dataset], allow_redirects=True)
+	r = requests.get("https://repository.library.northeastern.edu/downloads/neu:bz61jz54w?datastream_id=content", allow_redirects=True)
 	open(url_write_name_list[args.id_dataset]+".zip", 'wb').write(r.content)
