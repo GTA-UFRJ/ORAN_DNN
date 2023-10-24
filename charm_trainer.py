@@ -83,6 +83,8 @@ class CharmTrainer(object):
         self.best_val_accuracy = 0.0
         self.tensorboard = tensorboard_parse(tensorboard)
 
+        print("Init OK")
+
 
     def init(self):
         self.model = rn_model.CharmBrain(self.chunk_size).to(self.device)
