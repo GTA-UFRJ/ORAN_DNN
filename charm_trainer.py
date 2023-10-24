@@ -6,7 +6,7 @@ import numpy as np
 import readCharmDataset as riq
 import torch.nn as nn
 import torch.optim as optim
-
+from tqdm import tqdm
 
 def print_stats(acc_mat, name, epoch, tensorboard):
     classes = acc_mat.shape[0]
@@ -98,7 +98,7 @@ class CharmTrainer(object):
             self.model.train()
             for epoch in range(n_epochs):
                 loss_train = 0.0
-                for chunks, labels in self.train_loader:
+                for chunks, labels in tqdm(self.train_loader):
                     if not self.running:
                         raise EarlyExitException
                     chunks = chunks.to(self.device, non_blocking=True)
