@@ -9,7 +9,7 @@ import torch.optim as optim
 from tqdm import tqdm
 import pandas as pd
 
-def print_stats(acc_mat, avg_loss, name, epoch, tensorboard):
+def print_stats(acc_mat, avg_loss, name, epoch, chunk_size, best_val_accuracy, tensorboard):
     classes = acc_mat.shape[0]
     ones = np.ones((classes, 1)).squeeze(-1)
 
@@ -33,7 +33,8 @@ def print_stats(acc_mat, avg_loss, name, epoch, tensorboard):
             tensorboard.flush()
 
     results = {"subset": name, "acc": acc, "recall": recall, "precision": precision, 
-    "f1": f1, "avg_loss": avg_loss, "epoch": epoch}
+    "f1": f1, "avg_loss": avg_loss, "epoch": epoch, "chunk_size":chunk_size,
+    "best_val_accuracy": best_val_accuracy}
 
     return results
 
@@ -164,20 +165,27 @@ class CharmTrainer(object):
             avg_loss = loss_total/len(loader)
 
             print(f"{name} accuracy: {accuracy}")
-            if name == 'val' and accuracy>self.best_val_accuracy:
-                self.save_model(f"charm_{self.dg_coverage}_{self.loss_fn.o}_{round(accuracy, 2)}.pt")
-                self.best_val_accuracy = accuracy
 
-            metrics = print_stats(acc_mat, avg_loss, name, epoch, self.tensorboard)
+            metrics = print_stats(acc_mat, avg_loss, name, epoch, self.chunk_size, self.best_val_accuracy, self.tensorboard)
             self.save_history(metrics, subset="val")
 
+            if name == 'val' and accuracy>self.best_val_accuracy:
+                self.save_model(metrics, f"charm_{self.dg_coverage}_{self.loss_fn.o}_{round(accuracy, 2)}.pt")
+                self.best_val_accuracy = accuracy
 
-    def save_model(self, filename='charm.pt'):
+
+
+    def save_model(self, metrics, filename='charm.pt'):
         '''
         load your model with:
         >>> model = brain.CharmBrain()
         >>> model.load_state_dict(torch.load(filename))
         '''
+        save_dict  = {} 
+        save_dict.update(metrics)
+        save_dict.update({"model_state_dict": self.model.state_dict()})
+        torch.save(save_dict, self.modelSavePath)
+
         torch.save(self.model.state_dict(), filename)
 
     def execute(self, n_epochs):
