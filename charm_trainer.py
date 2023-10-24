@@ -7,6 +7,7 @@ import readCharmDataset as riq
 import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
+import pandas as pd
 
 def print_stats(acc_mat, avg_loss, name, epoch, tensorboard):
     classes = acc_mat.shape[0]
