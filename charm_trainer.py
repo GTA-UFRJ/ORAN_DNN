@@ -8,7 +8,7 @@ import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
 
-def print_stats(acc_mat, name, epoch, tensorboard):
+def print_stats(acc_mat, avg_loss, name, epoch, tensorboard):
     classes = acc_mat.shape[0]
     ones = np.ones((classes, 1)).squeeze(-1)
 
@@ -139,7 +139,9 @@ class CharmTrainer(object):
         for name, loader in loaders:
             correct = 0
             total = 0
-            acc_mat = np.zeros((len(self.train_data.label), len(self.train_data.label)))
+            loss_total = 0
+            #acc_mat = np.zeros((len(self.loader.label), len(self.train_data.label)))
+            acc_mat = np.zeros((len(loader.label), len(loader.label)))
 
             with torch.no_grad():
                 for chunks, labels in tqdm(loader):
@@ -148,7 +150,9 @@ class CharmTrainer(object):
                     chunks = chunks.to(self.device, non_blocking=True)
                     labels = labels.to(self.device, non_blocking=True)
                     output = self.model(chunks)
+                    loss = self.loss_fn(output, labels)
                     #predicted = dg.output2class(output, self.dg_coverage, 3)
+                    loss_total += loss.item()
                     _, predicted = torch.max(output, dim=1)
                     total += labels.shape[0]
                     correct += int((predicted == labels).sum())
@@ -156,12 +160,14 @@ class CharmTrainer(object):
                         acc_mat[labels[i]][predicted[i]] += 1
 
             accuracy = correct/total
+            avg_loss = loss_total/len(loader)
+
             print(f"{name} accuracy: {accuracy}")
             if name == 'val' and accuracy>self.best_val_accuracy:
                 self.save_model(f"charm_{self.dg_coverage}_{self.loss_fn.o}_{round(accuracy, 2)}.pt")
                 self.best_val_accuracy = accuracy
 
-            metrics = print_stats(acc_mat, name, epoch, self.tensorboard)
+            metrics = print_stats(acc_mat, avg_loss, name, epoch, self.tensorboard)
             self.save_history(metrics, subset="val")
 
 
