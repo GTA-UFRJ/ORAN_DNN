@@ -1,7 +1,7 @@
 from autocommand import autocommand
 from torch.utils.tensorboard import SummaryWriter
 import rn_model, datetime, os, signal, torch
-import deep_gambler as dg
+#import deep_gambler as dg
 import numpy as np
 import read_IQ as riq
 import torch.nn as nn
