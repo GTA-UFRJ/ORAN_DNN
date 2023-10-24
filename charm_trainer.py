@@ -31,6 +31,12 @@ def print_stats(acc_mat, name, epoch, tensorboard):
             tensorboard.add_scalar(f"f1_{c}/{name}", f1[c], epoch)
             tensorboard.flush()
 
+    results = {"subset": name, "acc": acc, "recall": recall, "precision": precision, 
+    "f1": f1, "avg_loss": avg_loss, "epoch": epoch}
+
+    return results
+
+
 
 def tensorboard_parse(tensorboard):
     '''
@@ -83,8 +89,14 @@ class CharmTrainer(object):
         self.best_val_accuracy = 0.0
         self.tensorboard = tensorboard_parse(tensorboard)
 
+        self.history_path = "history_rn_original_version.csv"
+
         print("Init OK")
 
+
+    def save_history(self, metrics, subset):
+        df = pd.DataFrame([metrics])
+        df.to_csv(self.history_path, mode='a', header=not os.path.exists(self.history_path))
 
     def init(self):
         self.model = rn_model.CharmBrain(self.chunk_size).to(self.device)
@@ -130,7 +142,7 @@ class CharmTrainer(object):
             acc_mat = np.zeros((len(self.train_data.label), len(self.train_data.label)))
 
             with torch.no_grad():
-                for chunks, labels in loader:
+                for chunks, labels in tqdm(loader):
                     if not self.running:
                         raise EarlyExitException
                     chunks = chunks.to(self.device, non_blocking=True)
@@ -149,7 +161,9 @@ class CharmTrainer(object):
                 self.save_model(f"charm_{self.dg_coverage}_{self.loss_fn.o}_{round(accuracy, 2)}.pt")
                 self.best_val_accuracy = accuracy
 
-            print_stats(acc_mat, name, epoch, self.tensorboard)
+            metrics = print_stats(acc_mat, name, epoch, self.tensorboard)
+            self.save_history(metrics, subset="val")
+
 
     def save_model(self, filename='charm.pt'):
         '''
