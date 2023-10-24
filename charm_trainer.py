@@ -140,8 +140,8 @@ class CharmTrainer(object):
             correct = 0
             total = 0
             loss_total = 0
-            #acc_mat = np.zeros((len(self.loader.label), len(self.train_data.label)))
-            acc_mat = np.zeros((len(loader.label), len(loader.label)))
+            acc_mat = np.zeros((len(self.train_data.label), len(self.train_data.label)))
+            #acc_mat = np.zeros((len(loader.label), len(loader.label)))
 
             with torch.no_grad():
                 for chunks, labels in tqdm(loader):
