@@ -87,7 +87,7 @@ class IQDataset(object):
                                        chunk_offset=offset))
             #self.dataset.append(IQData(data_folder + "/LTE_FLOOD.bin", label=1, stride=stride,
             #                           chunk_size=chunk_size, chunk_num=chunks_per_dataset,
-                                       chunk_offset=offset))
+            #                           chunk_offset=offset))
             self.dataset.append(IQData(data_folder + "/LTE_1M.bin", label=1, stride=stride,
                                        chunk_size=chunk_size, chunk_num=chunks_per_dataset,
                                        chunk_offset=offset))
