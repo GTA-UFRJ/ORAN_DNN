@@ -184,8 +184,6 @@ class CharmTrainer(object):
         save_dict  = {} 
         save_dict.update(metrics)
         save_dict.update({"model_state_dict": self.model.state_dict()})
-        torch.save(save_dict, self.modelSavePath)
-
         torch.save(self.model.state_dict(), filename)
 
     def execute(self, n_epochs):
