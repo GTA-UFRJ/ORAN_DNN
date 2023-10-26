@@ -198,7 +198,7 @@ class CharmTrainer(object):
             self.save_history(metrics, epoch, subset=name)
 
             if name == 'val' and accuracy>self.best_val_accuracy:
-                self.save_model(metrics, f"charm_{self.dg_coverage}_{self.loss_fn.o}_{round(accuracy, 2)}.pt")
+                self.save_model(metrics)
                 self.best_val_accuracy = accuracy
 
 
