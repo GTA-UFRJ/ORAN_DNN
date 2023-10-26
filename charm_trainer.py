@@ -81,9 +81,7 @@ class CharmTrainer(object):
         self.model_name = model_name
         self.history_path = os.path.join(resultPath, "history_og_%s.csv"%(self.model_name))
         self.modelSavePath = os.path.join(modelPath, "dnn_model_og_%s.pt"%(self.model_name))
-        print(self.history_path)
-        print(self.modelSavePath)
-        sys.exit()
+
         self.metricsEvaluationPath = os.path.join(resultPath, "dnn_metrics_performance_test_set.csv")
 
         self.labels = ['clear', 'LTE', 'WiFi']
