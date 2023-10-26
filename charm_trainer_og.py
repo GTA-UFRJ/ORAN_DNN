@@ -2,7 +2,7 @@ from autocommand import autocommand
 #from torch.utils.tensorboard import SummaryWriter
 import rn_model
 import datetime
-import deep_gambler as dg
+#import deep_gambler as dg
 import numpy as np
 import os
 import read_IQ as riq
