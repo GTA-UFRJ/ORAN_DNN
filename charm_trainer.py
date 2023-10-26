@@ -240,7 +240,7 @@ class CharmTrainer(object):
                     acc_mat[labels[i]][predicted[i]] += 1
 
         accuracy = correct/total
-        avg_loss = loss_total/len(loader)
+        avg_loss = loss_total/len(self.test_loader)
 
         print(f"Test Accuracy: {accuracy}")
 
