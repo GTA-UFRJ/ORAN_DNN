@@ -29,11 +29,11 @@ def print_stats(acc_mat, name, epoch, tensorboard):
     print(f"\t\tRecall\tPrecision\tF1")
     for c in range(classes):
         print(f"Class {c}\t\t{recall[c]}\t{precision[c]}\t\t{f1[c]}")
-        if tensorboard:
-            tensorboard.add_scalar(f"recall_{c}/{name}", recall[c], epoch)
-            tensorboard.add_scalar(f"precision_{c}/{name}", precision[c], epoch)
-            tensorboard.add_scalar(f"f1_{c}/{name}", f1[c], epoch)
-            tensorboard.flush()
+        #if tensorboard:
+        #    tensorboard.add_scalar(f"recall_{c}/{name}", recall[c], epoch)
+        #    tensorboard.add_scalar(f"precision_{c}/{name}", precision[c], epoch)
+        #    tensorboard.add_scalar(f"f1_{c}/{name}", f1[c], epoch)
+        #    tensorboard.flush()
 
 
 def tensorboard_parse(tensorboard):
