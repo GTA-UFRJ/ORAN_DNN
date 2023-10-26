@@ -32,8 +32,9 @@ def compute_metrics(labels, acc_mat, avg_loss, best_val_accuracy):
 
     #    results.update({"recall_%s"%(label): recall[c], "precision_%s"%(label): precision[c],
     #        "f1_%s"%(label): f1[c]})
-    for c in range(classes):
-        print(f"Class {labels[c]}\t\t{recall[c]}\t{precision[c]}\t\t{f1[c]}")
+    for c in range(classes-1):
+        print(f"Class {c}\t\t{recall[c]}\t{precision[c]}\t\t{f1[c]}")
+
         #if tensorboard:
         #    tensorboard.add_scalar(f"recall_{c}/{name}", recall[c], epoch)
         #    tensorboard.add_scalar(f"precision_{c}/{name}", precision[c], epoch)
@@ -80,7 +81,7 @@ class CharmTrainer(object):
         
         self.model_name = model_name
         self.history_path = os.path.join(resultPath, "history_%s_og.csv"%(self.model_name))
-        self.modelSavePath = os.path.join(modelPath, "%s_model_og_.pt"%(self.model_name))
+        self.modelSavePath = os.path.join(modelPath, "%s_model_og.pt"%(self.model_name))
 
         self.metricsEvaluationPath = os.path.join(resultPath, "dnn_metrics_performance_test_set.csv")
 
