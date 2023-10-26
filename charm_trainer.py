@@ -81,6 +81,9 @@ class CharmTrainer(object):
         self.model_name = model_name
         self.history_path = os.path.join(resultPath, "history_og_%s.csv"%(self.model_name))
         self.modelSavePath = os.path.join(modelPath, "dnn_model_og_%s.pt"%(self.model_name))
+        print(self.history_path)
+        print(self.modelSavePath)
+        sys.exit()
         self.metricsEvaluationPath = os.path.join(resultPath, "dnn_metrics_performance_test_set.csv")
 
         self.labels = ['clear', 'LTE', 'WiFi']
@@ -121,6 +124,17 @@ class CharmTrainer(object):
     def save_metrics_performance_test(self, metrics):
         df = pd.DataFrame([metrics])
         df.to_csv(self.metricsEvaluationPath, mode='a', header=not os.path.exists(self.metricsEvaluationPath))
+
+    def save_model(self, metrics):
+        '''
+        load your model with:
+        >>> model = brain.CharmBrain()
+        >>> model.load_state_dict(torch.load(filename))
+        '''
+        save_dict  = {} 
+        save_dict.update(metrics)
+        save_dict.update({"model_state_dict": self.model.state_dict()})
+        torch.save(save_dict, self.modelSavePath)
 
 
     def init(self):
@@ -239,16 +253,6 @@ class CharmTrainer(object):
 
         self.save_metrics_performance_test(metrics)
 
-    def save_model(self, metrics):
-        '''
-        load your model with:
-        >>> model = brain.CharmBrain()
-        >>> model.load_state_dict(torch.load(filename))
-        '''
-        save_dict  = {} 
-        save_dict.update(metrics)
-        save_dict.update({"model_state_dict": self.model.state_dict()})
-        torch.save(save_dict, self.modelSavePath)
 
     def execute(self, n_epochs):
         self.running = True
