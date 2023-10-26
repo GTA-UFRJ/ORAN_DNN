@@ -9,7 +9,7 @@ import torch.optim as optim
 from tqdm import tqdm
 import pandas as pd
 
-def compute_metrics(labels, acc_mat, avg_loss, best_val_accuracy, epoch):
+def compute_metrics(labels, acc_mat, avg_loss, best_val_accuracy):
     classes = acc_mat.shape[0]
     ones = np.ones((classes, 1)).squeeze(-1)
 
@@ -19,7 +19,6 @@ def compute_metrics(labels, acc_mat, avg_loss, best_val_accuracy, epoch):
     precision = (corrects/ones.dot(acc_mat)).round(4)
     f1 = (2*recall*precision/(recall+precision)).round(4)
 
-    print(f"Epoch {epoch} on {subset} dataset")
     print(f"Accuracy: {acc}")
 
     #if tensorboard:
@@ -189,9 +188,10 @@ class CharmTrainer(object):
             accuracy = correct/total
             avg_loss = loss_total/len(loader)
 
+            print(f"Epoch {epoch} on {subset} dataset")
             print(f"{name} accuracy: {accuracy}")
 
-            metrics = compute_metrics(self.labels, acc_mat, avg_loss, self.best_val_accuracy, epoch)
+            metrics = compute_metrics(self.labels, acc_mat, avg_loss, self.best_val_accuracy)
             
             self.save_history(metrics, epoch, subset=name)
 
@@ -230,7 +230,7 @@ class CharmTrainer(object):
 
         print(f"Test Accuracy: {accuracy}")
 
-        metrics = compute_metrics(self.labels, acc_mat, avg_loss, self.best_val_accuracy, epoch)
+        metrics = compute_metrics(self.labels, acc_mat, avg_loss, self.best_val_accuracy)
 
         self.save_metrics_performance_test(metrics)
 
