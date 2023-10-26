@@ -5,7 +5,7 @@ import datetime
 #import deep_gambler as dg
 import numpy as np
 import os
-import read_IQ as riq
+import readCharmDataset as riq
 import signal
 import torch
 import torch.nn as nn
