@@ -56,7 +56,7 @@ class IQData(object):
 
 class IQDataset(object):
     def __init__(self, data_folder=".", chunk_size=20000, stride=0, subset='train'):
-        self.label = {0: 'clear', 1: 'LTE', 2: 'WiFi', 3: 'other'}
+        self.label = {0: 'clear', 1: 'LTE', 2: 'WiFi'}
         self.dataset = []
         if stride <= 0:
             stride = chunk_size

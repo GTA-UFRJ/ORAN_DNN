@@ -151,6 +151,7 @@ class CharmBrain(nn.Module):
     def forward(self, x):
         for layer in self.conv_layers:
             x = layer(x)
+            print(x.shape)
 
         x = x.view(-1, self.ll1_n)
         for layer in self.line_layers:

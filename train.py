@@ -1,14 +1,14 @@
 from autocommand import autocommand
 from torch.utils.tensorboard import SummaryWriter
 import datetime, os, signal, torch
-import rn_model
+import rn_model, cnn_model
 #import deep_gambler as dg
 import numpy as np
 import read_IQ as riq
 import torch.nn as nn
 import torch.optim as optim
 
-def compute_metrics(correct, total_inputs, total_loss, acc_mat, epoch):
+def compute_metrics(correct, total_inputs, total_loss, acc_mat, epoch, best_val_acc):
     acc = correct/total_inputs
     avg_loss = total_loss/total_inputs
 
@@ -19,7 +19,7 @@ def compute_metrics(correct, total_inputs, total_loss, acc_mat, epoch):
     f1 = (2*recall*precision/(recall+precision)).round(4)
 
     results = {"acc": acc, "recall": recall, "precision": precision, "f1": f1, "avg_loss": avg_loss, 
-    "epoch": epoch}
+    "epoch": epoch, "best_val_acc": best_val_acc}
 
     return results
 
@@ -88,16 +88,36 @@ class CharmTrainer(object):
 
 
     def initialize_model(self):
+
         if(self.model_name == "rn"):
             self.model = rn_model.CharmBrain(self.chunk_size).to(self.device)
+
+        elif(self.model_name == "cnn"):
+            self.model = ConvModel.CharmBrain(self.chunk_size).to(self.device)
+
         else:
             raise Exception("This DNN model has not implemented yet.")
+
+
+  def select_dnn_architecture_model(self):
+    """
+    This method selects the backbone to insert the early exits.
+    """
+
+    architecture_dnn_model_dict = {"mobilenet": self.early_exit_mobilenet,
+                                   "resnet18": self.early_exit_resnet18,
+                                   "vgg16": self.early_exit_vgg16,
+                                   "resnet152": self.early_exit_resnet152}
+
+    self.pool_size = 7 if (self.model_name == "vgg16") else 1
+    return architecture_dnn_model_dict.get(self.model_name, self.invalid_model)
+
 
 
     def save_history(self, metrics, subset):
         metrics.update({"subset": subset})
         df = pd.DataFrame([metrics])
-        df.to_csv(self.history_path, mode='a', header=not os.path.exists(history_path))
+        df.to_csv(self.history_path, mode='a', header=not os.path.exists(self.history_path))
 
     def training_loop2(self, epoch):
 
@@ -212,7 +232,7 @@ class CharmTrainer(object):
 
         for epoch in range(n_epochs):
             self.training_loop(epoch)
-            self.validation_loop(epoch, include_train=self.include_train)
+            self.validation_loop(epoch)
 
     def validation_loop(self, epoch, include_train=True):
         loaders = [('val', self.val_loader)]
@@ -226,8 +246,7 @@ class CharmTrainer(object):
             correct = 0
             total = 0
             total_loss = 0
-            #acc_mat = np.zeros((len(self.train_data.label), len(self.train_data.label)))
-            acc_mat = np.zeros((len(loader.label), len(loader.label)))
+            acc_mat = np.zeros((len(self.train_data.label), len(self.train_data.label)))
 
             with torch.no_grad():
                 for chunks, labels in loader:
@@ -250,7 +269,7 @@ class CharmTrainer(object):
                     del chunks, labels, output, predicted
                     torch.cuda.empty_cache()
 
-            metrics = compute_metrics(correct, total, total_loss, acc_mat, epoch)
+            metrics = compute_metrics(correct, total, total_loss, acc_mat, epoch, self.best_val_accuracy)
 
             self.save_history(metrics, subset=subset_name)
 
@@ -258,13 +277,14 @@ class CharmTrainer(object):
                 metrics['acc']))
 
             if ((subset_name == 'val') and (metrics['acc'] > self.best_val_accuracy)):
-                self.save_model(metrics)
                 self.best_val_accuracy = metrics['acc']
+                self.save_model(metrics)
 
     def save_model(self, metrics):
 
         save_dict  = {} 
         save_dict.update(metrics)
+        save_dict.update("best_val_accuracy": self.best_val_accuracy)        
         save_dict.update({"model_state_dict": self.model.state_dict()})
         torch.save(save_dict, self.modelSavePath)
 
@@ -275,7 +295,7 @@ class CharmTrainer(object):
 def main(args):
 
     ct = CharmTrainer(model_name=args.model_name, id_gpu=config.id_gpu, data_folder=config.datasetPath, 
-        batch_size=config.batch_size, chunk_size=config.chunk_size, 
+        batch_size=args.batch_size, chunk_size=args.chunk_size, 
         sample_stride=config.sample_stride,loaders=config.loaders, 
         dg_coverage=config.dg_coverage)
     
@@ -288,13 +308,17 @@ if (__name__ == "__main__"):
 
     #We here insert the argument model_name
     parser.add_argument('--model_name', type=str, default=config.model_name, 
-        choices=["rn"], help='DNN model name (default: %s)'%(config.model_name))
+        choices=["rn", "cnn"], help='DNN model name (default: %s)'%(config.model_name))
 
     #parser.add_argument('--max_patience', type=int, default=20, help='Max Patience.')
 
     parser.add_argument('--model_id', type=int, default=1, help='Model_id.')
 
     parser.add_argument('--n_epochs', type=int, default=config.n_epochs, help='Number of epochs.')
+
+    parser.add_argument('--chunk_size', type=int, default=config.chunk_size, help='Chunk Size.')
+
+    parser.add_argument('--batch_size', type=int, default=config.batch_size, help='Chunk Size.')
 
     args = parser.parse_args()
 
