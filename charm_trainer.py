@@ -190,7 +190,7 @@ class CharmTrainer(object):
             accuracy = correct/total
             avg_loss = loss_total/len(loader)
 
-            print(f"Epoch {epoch} on {subset} dataset")
+            print(f"Epoch {epoch} on {name} dataset")
             print(f"{name} accuracy: {accuracy}")
 
             metrics = compute_metrics(self.labels, acc_mat, avg_loss, self.best_val_accuracy)
