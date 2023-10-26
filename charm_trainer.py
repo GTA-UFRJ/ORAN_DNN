@@ -80,7 +80,7 @@ class CharmTrainer(object):
         
         self.model_name = model_name
         self.history_path = os.path.join(resultPath, "history_%s_og.csv"%(self.model_name))
-        self.modelSavePath = os.path.join(modelPath, "%s_model_og_%s.pt"%(self.model_name))
+        self.modelSavePath = os.path.join(modelPath, "%s_model_og_.pt"%(self.model_name))
 
         self.metricsEvaluationPath = os.path.join(resultPath, "dnn_metrics_performance_test_set.csv")
 
