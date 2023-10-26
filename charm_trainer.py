@@ -43,7 +43,6 @@ def compute_metrics(labels, acc_mat, avg_loss, best_val_accuracy):
         #    tensorboard.add_scalar(f"precision_{c}/{name}", precision[c], epoch)
         #    tensorboard.add_scalar(f"f1_{c}/{name}", f1[c], epoch)
         #    tensorboard.flush()
-
     return results
 
 
