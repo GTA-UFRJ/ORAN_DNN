@@ -1,6 +1,6 @@
 from autocommand import autocommand
 #from torch.utils.tensorboard import SummaryWriter
-import brain
+import rn_model
 import datetime
 import deep_gambler as dg
 import numpy as np
