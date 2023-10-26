@@ -135,6 +135,7 @@ class CharmTrainer(object):
         '''
         save_dict  = {} 
         save_dict.update(metrics)
+        save_dict.update({"best_val_accuracy": self.best_val_accuracy})
         save_dict.update({"model_state_dict": self.model.state_dict()})
         torch.save(save_dict, self.modelSavePath)
 
@@ -214,8 +215,8 @@ class CharmTrainer(object):
             self.save_history(metrics, epoch, subset=name)
 
             if name == 'val' and accuracy>self.best_val_accuracy:
-                self.save_model(metrics)
                 self.best_val_accuracy = accuracy
+                self.save_model(metrics)
 
 
     def test(self):
