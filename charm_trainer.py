@@ -27,13 +27,13 @@ def compute_metrics(labels, acc_mat, avg_loss, best_val_accuracy):
     
     results = {"acc": acc, "avg_loss": avg_loss, "best_val_accuracy": best_val_accuracy}
 
-    for c, label in enumerate(labels):
-        print(f"Class {label}\t\t{recall[c]}\t{precision[c]}\t\t{f1[c]}")
+    #for c, label in enumerate(labels):
+    #    print(f"Class {label}\t\t{recall[c]}\t{precision[c]}\t\t{f1[c]}")
 
-        results.update({"recall_%s"%(label): recall[c], "precision_%s"%(label): precision[c],
-            "f1_%s"%(label): f1[c]})
-    #for c in range(classes):
-    #    print(f"Class {c}\t\t{recall[c]}\t{precision[c]}\t\t{f1[c]}")
+    #    results.update({"recall_%s"%(label): recall[c], "precision_%s"%(label): precision[c],
+    #        "f1_%s"%(label): f1[c]})
+    for c in range(classes):
+        print(f"Class {c}\t\t{recall[c]}\t{precision[c]}\t\t{f1[c]}")
         #if tensorboard:
         #    tensorboard.add_scalar(f"recall_{c}/{name}", recall[c], epoch)
         #    tensorboard.add_scalar(f"precision_{c}/{name}", precision[c], epoch)
