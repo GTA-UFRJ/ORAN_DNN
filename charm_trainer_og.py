@@ -89,7 +89,7 @@ class CharmTrainer(object):
 
 
     def init(self):
-        self.model = brain.CharmBrain(self.chunk_size).to(self.device)
+        self.model = rn_model.CharmBrain(self.chunk_size).to(self.device)
         self.optimizer = optim.Adam(self.model.parameters())
         self.best_val_accuracy = 0.0
 
