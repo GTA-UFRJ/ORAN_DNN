@@ -177,7 +177,7 @@ class CharmTrainer(object):
 
 
 @autocommand(__name__)
-def charm_trainer(id_gpu="0", data_folder=".", n_epochs=25, batch_size=512, chunk_size=20000, sample_stride=0, loaders=6, dg_coverage=0.75, tensorboard=None):
+def charm_trainer(id_gpu="0", data_folder="./oran_dataset", n_epochs=25, batch_size=512, chunk_size=20000, sample_stride=0, loaders=6, dg_coverage=0.75, tensorboard=None):
     ct = CharmTrainer(id_gpu=id_gpu, data_folder=data_folder, batch_size=batch_size, chunk_size=chunk_size, sample_stride=sample_stride,
                       loaders=loaders, dg_coverage=dg_coverage, tensorboard=tensorboard)
     ct.execute(n_epochs=n_epochs)
