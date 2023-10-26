@@ -147,6 +147,7 @@ class CharmTrainer(object):
                     loss.backward()
                     self.optimizer.step()
                     loss_train += loss.item()
+
                 #if self.tensorboard:
                 #    self.tensorboard.add_scalar("Loss/train", loss_train/len(self.train_loader), epoch)
                 
@@ -184,6 +185,7 @@ class CharmTrainer(object):
                     correct += int((predicted == labels).sum())
                     for i in range(labels.shape[0]):
                         acc_mat[labels[i]][predicted[i]] += 1
+
 
             accuracy = correct/total
             avg_loss = loss_total/len(loader)
