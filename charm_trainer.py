@@ -34,8 +34,8 @@ def compute_metrics(labels, acc_mat, avg_loss, best_val_accuracy):
     #        "f1_%s"%(label): f1[c]})
     for c in range(classes):
         print(f"Class {c}\t\t{recall[c]}\t{precision[c]}\t\t{f1[c]}")
-        #results.update({"recall_%s"%(labels[c]): recall[c], "precision_%s"%(labels[c]): precision[c],
-        #    "f1_%s"%(labels[c]): f1[c]})
+        results.update({"recall_%s"%(labels[c]): recall[c], "precision_%s"%(labels[c]): precision[c],
+            "f1_%s"%(labels[c]): f1[c]})
 
     #print(results)
         #if tensorboard:
@@ -82,8 +82,8 @@ class CharmTrainer(object):
                       else torch.device('cpu'))
         
         self.model_name = model_name
-        self.history_path = os.path.join(resultPath, "history_%s_og.csv"%(self.model_name))
-        self.modelSavePath = os.path.join(modelPath, "%s_model_og.pt"%(self.model_name))
+        self.history_path = os.path.join(resultPath, "history_%s_og2.csv"%(self.model_name))
+        self.modelSavePath = os.path.join(modelPath, "%s_model_og2.pt"%(self.model_name))
 
         self.metricsEvaluationPath = os.path.join(resultPath, "dnn_metrics_performance_test_set.csv")
 
