@@ -34,8 +34,8 @@ def compute_metrics(labels, acc_mat, avg_loss, best_val_accuracy):
     #        "f1_%s"%(label): f1[c]})
     for c in range(classes):
         print(f"Class {c}\t\t{recall[c]}\t{precision[c]}\t\t{f1[c]}")
-        #results.update({"recall_%s"%(labels[c]): recall[c], "precision_%s"%(labels[c]): precision[c],
-        #    "f1_%s"%(labels[c]): f1[c]})
+        results.update({"recall_%s"%(labels[c]): recall[c], "precision_%s"%(labels[c]): precision[c],
+            "f1_%s"%(labels[c]): f1[c]})
 
     #print(results)
         #if tensorboard:
