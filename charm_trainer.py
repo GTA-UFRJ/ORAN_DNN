@@ -87,7 +87,7 @@ class CharmTrainer(object):
 
         self.metricsEvaluationPath = os.path.join(resultPath, "dnn_metrics_performance_test_set2.csv")
 
-        self.labels = ['Clear', 'LTE', 'WiFi']
+        self.labels = ['Clear', 'LTE', 'WiFi', 'Other']
 
         print(f"Training on {self.device}")
         signal.signal(signal.SIGINT, self.exit_gracefully)
