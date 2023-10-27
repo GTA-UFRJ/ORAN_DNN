@@ -37,7 +37,7 @@ def compute_metrics(labels, acc_mat, avg_loss, best_val_accuracy):
         results.update({"recall_%s"%(labels[c]): recall[c], "precision_%s"%(labels[c]): precision[c],
             "f1_%s"%(labels[c]): f1[c]})
 
-    #print(results)
+    print(results)
         #if tensorboard:
         #    tensorboard.add_scalar(f"recall_{c}/{name}", recall[c], epoch)
         #    tensorboard.add_scalar(f"precision_{c}/{name}", precision[c], epoch)
