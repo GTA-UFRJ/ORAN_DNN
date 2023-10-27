@@ -270,7 +270,7 @@ class CharmTrainer(object):
         self.running = False
 
 @autocommand(__name__)
-def charm_trainer(model_name="rn", id_gpu="0", data_folder="./oran_dataset", 
+def charm_trainer(model_name="rn", id_gpu="0", data_folder=".", 
     modelPath="./models", resultPath="./results", n_epochs=25, batch_size=512, 
     chunk_size=20000, sample_stride=0, loaders=6, dg_coverage=0.75, tensorboard=None):
     
