@@ -84,7 +84,7 @@ class CharmTrainer(object):
         self.model_name = model_name
         self.history_path = os.path.join(resultPath, "history_%s_og2.csv"%(self.model_name))
         self.modelSavePath = os.path.join(modelPath, "%s_model_og2.pt"%(self.model_name))
-        self.metricsEvaluationPath = os.path.join(resultPath, "dnn_metrics_performance_test_set2.csv")
+        self.metricsEvaluationPath = os.path.join(resultPath, "dnn_metrics_performance_test_set_final.csv")
 
         self.labels = ['Clear', 'LTE', 'WiFi', 'Other']
 
@@ -122,6 +122,7 @@ class CharmTrainer(object):
         df.to_csv(self.history_path, mode='a', header=not os.path.exists(self.history_path))
 
     def save_metrics_performance_test(self, metrics):
+        metrics.update({"model_name": self.model_name})
         df = pd.DataFrame([metrics])
         df.to_csv(self.metricsEvaluationPath, mode='a', header=not os.path.exists(self.metricsEvaluationPath))
 
