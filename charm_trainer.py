@@ -82,6 +82,7 @@ class CharmTrainer(object):
                       else torch.device('cpu'))
         
         self.model_name = model_name
+        print(self.model_name)
         self.history_path = os.path.join(resultPath, "history_%s_og2.csv"%(self.model_name))
         self.modelSavePath = os.path.join(modelPath, "%s_model_og2.pt"%(self.model_name))
         self.metricsEvaluationPath = os.path.join(resultPath, "dnn_metrics_performance_test_set_final.csv")
