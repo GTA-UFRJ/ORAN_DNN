@@ -1,6 +1,6 @@
 from autocommand import autocommand
 #from torch.utils.tensorboard import SummaryWriter
-import rn_model, datetime, os, signal, torch
+import rn_model, datetime, os, signal, torch, cnn_model, lstm
 #import deep_gambler as dg
 import numpy as np
 import readCharmDataset as riq
@@ -84,7 +84,6 @@ class CharmTrainer(object):
         self.model_name = model_name
         self.history_path = os.path.join(resultPath, "history_%s_og2.csv"%(self.model_name))
         self.modelSavePath = os.path.join(modelPath, "%s_model_og2.pt"%(self.model_name))
-
         self.metricsEvaluationPath = os.path.join(resultPath, "dnn_metrics_performance_test_set2.csv")
 
         self.labels = ['Clear', 'LTE', 'WiFi', 'Other']
@@ -140,7 +139,18 @@ class CharmTrainer(object):
 
 
     def init(self):
-        self.model = rn_model.CharmBrain(self.chunk_size).to(self.device)
+        
+        if(self.model_name == "rn"):
+            self.model = rn_model.CharmBrain(self.chunk_size).to(self.device)
+
+        elif(self.model_name == "cnn"):
+            self.model = cnn_model.ConvModel().to(self.device)
+
+        elif(self.model_name == "lstm")
+            self.model = lstm.LSTM(2, 2).to(self.device)
+
+
+        #self.model = rn_model.CharmBrain(self.chunk_size).to(self.device)
         self.optimizer = optim.Adam(self.model.parameters())
         self.best_val_accuracy = 0.0
 
@@ -270,7 +280,7 @@ class CharmTrainer(object):
         self.running = False
 
 @autocommand(__name__)
-def charm_trainer(model_name="rn", id_gpu="0", data_folder=".", 
+def charm_trainer(model_name="rn", id_gpu="0", data_folder="./oran_dataset", 
     modelPath="./models", resultPath="./results", n_epochs=25, batch_size=512, 
     chunk_size=20000, sample_stride=0, loaders=6, dg_coverage=0.75, tensorboard=None):
     
