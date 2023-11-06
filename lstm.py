@@ -79,23 +79,16 @@ class LSTM(nn.Module):
         h_0 = Variable(torch.zeros(self.num_layers, x.size(0), self.input_size)) #hidden state
         c_0 = Variable(torch.zeros(self.num_layers, x.size(0), self.input_size)) #internal state
 
-        #print(x.shape)
-
         for lstm_layer in self.lstm_layers:
 
             x, h_0, c_0 = lstm_layer(x, h_0, c_0) #lstm with input, hidden, and internal state
-            print(x.shape)
-
-        #print(x.shape)
 
         x = x.view(-1, 40)
 
-        #print(x.shape)
 
 
         for layer in self.line_layers:
             x = layer(x)
-            #print(x.shape)
 
         return x
 
