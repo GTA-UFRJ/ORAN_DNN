@@ -148,7 +148,7 @@ class CharmTrainer(object):
         elif(self.model_name == "cnn"):
             self.model = cnn_model.ConvModel().to(self.device)
 
-        elif(self.model_name == "lstm")
+        elif(self.model_name == "lstm"):
             self.model = lstm.LSTM(2, 2).to(self.device)
 
 
