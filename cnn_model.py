@@ -74,6 +74,6 @@ class ConvModel(nn.Module):
         return x
 
         #return self.model(x)
-x = torch.rand(1, 2, 20000)
-model = ConvModel()(x)
+#x = torch.rand(1, 2, 20000)
+#model = ConvModel()(x)
 #rn_model.CharmBrain(chunk_size=20000)(x)

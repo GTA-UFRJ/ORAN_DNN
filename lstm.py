@@ -99,7 +99,7 @@ class LSTM(nn.Module):
 
         return x
 
-x = torch.rand(1, 2, 20000)
-model = LSTM(input_size=2, num_layers=2)(x)
+#x = torch.rand(1, 2, 20000)
+#model = LSTM(input_size=2, num_layers=2)(x)
 
 
