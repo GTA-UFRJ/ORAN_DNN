@@ -87,5 +87,7 @@ class ConvLSTM(nn.Module):
         for layer in self.line_layers:
             x = layer(x)
 
+        return x
+
 x = torch.rand(1, 2, 20000)
 model = ConvLSTM()(x)
