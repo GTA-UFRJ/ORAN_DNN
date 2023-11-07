@@ -258,7 +258,7 @@ class CharmTrainer(object):
 
 
     def test(self):
-        
+        self.running = True
         self.model.eval()
         correct = 0
         total = 0
