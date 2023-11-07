@@ -26,7 +26,7 @@ def compute_conf_matrix(labels, acc_mat):
 
 def compute_overall_metrics(acc_mat):
 
-    acc_mat = acc_mat[:-1, :]
+    acc_mat = acc_mat[:-1, :][:, :-1]
     print(acc_mat)
 
     true_pos = np.diag(acc_mat)
