@@ -136,7 +136,7 @@ class CharmTrainer(object):
         df.to_csv(self.metricsEvaluationPath, mode='a', header=not os.path.exists(self.metricsEvaluationPath))
 
     def save_metrics_conf_matrix(self, conf_matrix):
-        df = pd.DataFrame([conf_matrix])
+        df = pd.DataFrame(conf_matrix)
         df.to_csv(self.confMatrixPath, mode='a', header=not os.path.exists(self.confMatrixPath))
 
 
@@ -281,7 +281,7 @@ class CharmTrainer(object):
 
         metrics, conf_matrix = compute_metrics(self.labels, acc_mat, avg_loss, self.best_val_accuracy)
 
-        self.save_metrics_performance_test(metrics)
+        #self.save_metrics_performance_test(metrics)
         self.save_metrics_conf_matrix(conf_matrix)
 
 
