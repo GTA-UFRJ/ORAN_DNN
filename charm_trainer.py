@@ -35,7 +35,7 @@ def compute_metrics(labels, acc_mat, avg_loss, best_val_accuracy):
     precision = (corrects/ones.dot(acc_mat)).round(4)
     f1 = (2*recall*precision/(recall+precision)).round(4)
 
-    print(recall, precision, f1)
+    print(np.mean(recall[:-1]), np.mean(precision[:-1]), np.mean(f1[:-1]))
     sys.exit()
 
     print(f"Accuracy: {acc}")
