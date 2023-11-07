@@ -28,7 +28,8 @@ def compute_overall_metrics(acc_mat):
 
     acc_mat = acc_mat[:-1, :]
 
-    true_pos = np.diag(acc_mat) 
+    true_pos = np.diag(acc_mat)
+    print(true_pos, np.sum(acc_mat, axis=0)) 
     precision = np.sum(true_pos / np.sum(acc_mat, axis=0))
     recall = np.sum(true_pos / np.sum(acc_mat, axis=1))
 
