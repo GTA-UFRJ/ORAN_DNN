@@ -53,7 +53,7 @@ def compute_metrics(labels, acc_mat, avg_loss, best_val_accuracy):
     conf_mat = compute_conf_matrix(labels, acc_mat)
     overall_metrics = compute_overall_metrics(acc_mat)
 
-    result.update(overall_metricsq)
+    results.update(overall_metrics)
 
     for c in range(classes):
         print(f"Class {c}\t\t{recall[c]}\t{precision[c]}\t\t{f1[c]}")
