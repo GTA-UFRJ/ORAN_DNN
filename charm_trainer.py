@@ -238,7 +238,7 @@ class CharmTrainer(object):
             print(f"Epoch {epoch} on {name} dataset")
             print(f"{name} accuracy: {accuracy}")
 
-            metrics = compute_metrics(self.labels, acc_mat, avg_loss, self.best_val_accuracy)
+            metrics, _ = compute_metrics(self.labels, acc_mat, avg_loss, self.best_val_accuracy)
             
             self.save_history(metrics, epoch, subset=name)
 
