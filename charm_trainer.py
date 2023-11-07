@@ -163,6 +163,8 @@ class CharmTrainer(object):
 
         elif(self.model_name == "lstm"):
             self.model = conv_rn.ConvRNN().to(self.device)
+        elif(self.model_name == "conv_rn"):
+            self.model = conv_rn.ConvRNN().to(self.device)
 
 
         #self.model = rn_model.CharmBrain(self.chunk_size).to(self.device)
@@ -281,7 +283,7 @@ class CharmTrainer(object):
 
         metrics, conf_matrix = compute_metrics(self.labels, acc_mat, avg_loss, self.best_val_accuracy)
 
-        #self.save_metrics_performance_test(metrics)
+        self.save_metrics_performance_test(metrics)
         self.save_metrics_conf_matrix(conf_matrix)
 
 
