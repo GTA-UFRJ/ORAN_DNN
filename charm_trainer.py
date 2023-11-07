@@ -1,6 +1,6 @@
 from autocommand import autocommand
 #from torch.utils.tensorboard import SummaryWriter
-import rn_model, datetime, os, signal, torch, cnn_model, lstm, conv_lstm
+import rn_model, datetime, os, signal, torch, cnn_model, lstm, conv_lstm, sys
 #import deep_gambler as dg
 import numpy as np
 import readCharmDataset as riq
@@ -24,21 +24,6 @@ def compute_conf_matrix(labels, acc_mat):
 
     return conf_mat
 
-def compute_overall_metrics(acc_mat):
-
-    acc_mat = acc_mat[:-1, :][:, :-1]
-    print(acc_mat)
-
-    true_pos = np.diag(acc_mat)
-    print(true_pos, np.sum(acc_mat, axis=0)) 
-    precision = np.sum(true_pos / np.sum(acc_mat, axis=0))
-    recall = np.sum(true_pos / np.sum(acc_mat, axis=1))
-
-    print(precision, recall)
-
-    f1 = (2*recall*precision)/(recall+precision)     
-
-    return {"overall_precision": precision, "overall_recall": recall, "overall_f1": f1}
 
 def compute_metrics(labels, acc_mat, avg_loss, best_val_accuracy):
     classes = acc_mat.shape[0]
@@ -50,6 +35,9 @@ def compute_metrics(labels, acc_mat, avg_loss, best_val_accuracy):
     precision = (corrects/ones.dot(acc_mat)).round(4)
     f1 = (2*recall*precision/(recall+precision)).round(4)
 
+    print(recall, precision, f1)
+    sys.exit()
+
     print(f"Accuracy: {acc}")
 
     print(f"\t\tRecall\tPrecision\tF1")
@@ -57,9 +45,6 @@ def compute_metrics(labels, acc_mat, avg_loss, best_val_accuracy):
     results = {"acc": acc, "avg_loss": avg_loss, "best_val_accuracy": best_val_accuracy}
 
     conf_mat = compute_conf_matrix(labels, acc_mat)
-    overall_metrics = compute_overall_metrics(acc_mat)
-
-    results.update(overall_metrics)
 
     for c in range(classes):
         print(f"Class {c}\t\t{recall[c]}\t{precision[c]}\t\t{f1[c]}")
