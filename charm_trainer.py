@@ -9,6 +9,31 @@ import torch.optim as optim
 from tqdm import tqdm
 import pandas as pd
 
+
+def compute_conf_matrix(labels, acc_mat):
+
+    conf_mat = {"Classes": labels}
+
+
+    for label in labels:
+        conf_mat.update({label: []})
+
+    for c in range(len(labels)):  
+        for j in range(len(labels)):
+            conf_mat[labels[c]].append(acc_mat[c, j])
+
+    return conf_mat
+
+def compute_overall_metrics(acc_mat):
+
+    true_pos = np.diag(acc_mat) 
+    precision = np.sum(true_pos / np.sum(acc_mat, axis=0))
+    recall = np.sum(true_pos / np.sum(acc_mat, axis=1))
+
+    f1 = (2*recall*precision)/(recall+precision)     
+
+    return {"overall_precision": precision, "overall_recall": recall, "overall_f1": f1}
+
 def compute_metrics(labels, acc_mat, avg_loss, best_val_accuracy):
     classes = acc_mat.shape[0]
     ones = np.ones((classes, 1)).squeeze(-1)
@@ -21,29 +46,21 @@ def compute_metrics(labels, acc_mat, avg_loss, best_val_accuracy):
 
     print(f"Accuracy: {acc}")
 
-    #if tensorboard:
-    #    tensorboard.add_scalar(f"accuracy/{name}", acc, epoch)
     print(f"\t\tRecall\tPrecision\tF1")
     
     results = {"acc": acc, "avg_loss": avg_loss, "best_val_accuracy": best_val_accuracy}
 
-    #for c, label in enumerate(labels):
-    #    print(f"Class {label}\t\t{recall[c]}\t{precision[c]}\t\t{f1[c]}")
+    conf_mat = compute_conf_matrix(labels, acc_mat)
+    overall_metrics = compute_overall_metrics(acc_mat)
 
-    #    results.update({"recall_%s"%(label): recall[c], "precision_%s"%(label): precision[c],
-    #        "f1_%s"%(label): f1[c]})
+    result.update(overall_metricsq)
+
     for c in range(classes):
         print(f"Class {c}\t\t{recall[c]}\t{precision[c]}\t\t{f1[c]}")
         results.update({"recall_%s"%(labels[c]): recall[c], "precision_%s"%(labels[c]): precision[c],
             "f1_%s"%(labels[c]): f1[c]})
 
-    #print(results)
-        #if tensorboard:
-        #    tensorboard.add_scalar(f"recall_{c}/{name}", recall[c], epoch)
-        #    tensorboard.add_scalar(f"precision_{c}/{name}", precision[c], epoch)
-        #    tensorboard.add_scalar(f"f1_{c}/{name}", f1[c], epoch)
-        #    tensorboard.flush()
-    return results
+    return results, conf_mat
 
 
 
@@ -85,7 +102,8 @@ class CharmTrainer(object):
         print(self.model_name)
         self.history_path = os.path.join(resultPath, "history_%s_og2.csv"%(self.model_name))
         self.modelSavePath = os.path.join(modelPath, "%s_model_og2.pt"%(self.model_name))
-        self.metricsEvaluationPath = os.path.join(resultPath, "dnn_metrics_performance_test_set_final.csv")
+        self.metricsEvaluationPath = os.path.join(resultPath, "dnn_metrics_performance_test_set_final_final.csv")
+        self.confMatrixPath = os.path.join(resultPath, "%s_confusion_matrix.csv"%(self.model_name))
 
         self.labels = ['Clear', 'LTE', 'WiFi', 'Other']
 
@@ -127,6 +145,11 @@ class CharmTrainer(object):
         df = pd.DataFrame([metrics])
         df.to_csv(self.metricsEvaluationPath, mode='a', header=not os.path.exists(self.metricsEvaluationPath))
 
+    def save_metrics_conf_matrix(self, conf_matrix):
+        df = pd.DataFrame([conf_matrix])
+        df.to_csv(self.confMatrixPath, mode='a', header=not os.path.exists(self.confMatrixPath))
+
+
     def save_model(self, metrics):
         '''
         load your model with:
@@ -155,6 +178,10 @@ class CharmTrainer(object):
         #self.model = rn_model.CharmBrain(self.chunk_size).to(self.device)
         self.optimizer = optim.Adam(self.model.parameters())
         self.best_val_accuracy = 0.0
+
+    def load_model(self):
+        self.init()
+        self.model.load_state_dict(torch.load(self.modelSavePath)["model_state_dict"])       
 
 
     def training_loop(self, n_epochs):
@@ -252,17 +279,20 @@ class CharmTrainer(object):
                 _, predicted = torch.max(output, dim=1)
                 total += labels.shape[0]
                 correct += int((predicted == labels).sum())
+                
                 for i in range(labels.shape[0]):
                     acc_mat[labels[i]][predicted[i]] += 1
 
+        
         accuracy = correct/total
         avg_loss = loss_total/len(self.test_loader)
 
         print(f"Test Accuracy: {accuracy}")
 
-        metrics = compute_metrics(self.labels, acc_mat, avg_loss, self.best_val_accuracy)
+        metrics, conf_matrix = compute_metrics(self.labels, acc_mat, avg_loss, self.best_val_accuracy)
 
         self.save_metrics_performance_test(metrics)
+        self.save_metrics_conf_matrix(conf_matrix)
 
 
     def execute(self, n_epochs):
