@@ -26,6 +26,8 @@ def compute_conf_matrix(labels, acc_mat):
 
 def compute_overall_metrics(acc_mat):
 
+    acc_mat = acc_mat[:-1, :]
+
     true_pos = np.diag(acc_mat) 
     precision = np.sum(true_pos / np.sum(acc_mat, axis=0))
     recall = np.sum(true_pos / np.sum(acc_mat, axis=1))
