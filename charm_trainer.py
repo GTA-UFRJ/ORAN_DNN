@@ -223,11 +223,11 @@ class CharmTrainer(object):
 
             metrics = compute_metrics(self.labels, acc_mat, avg_loss, self.best_val_accuracy)
             
-            self.save_history(metrics, epoch, subset=name)
+            #self.save_history(metrics, epoch, subset=name)
 
-            if name == 'val' and accuracy>self.best_val_accuracy:
-                self.best_val_accuracy = accuracy
-                self.save_model(metrics)
+            #if name == 'val' and accuracy>self.best_val_accuracy:
+            #    self.best_val_accuracy = accuracy
+            #    self.save_model(metrics)
 
 
     def test(self):
@@ -262,7 +262,7 @@ class CharmTrainer(object):
 
         metrics = compute_metrics(self.labels, acc_mat, avg_loss, self.best_val_accuracy)
 
-        self.save_metrics_performance_test(metrics)
+        #self.save_metrics_performance_test(metrics)
 
 
     def execute(self, n_epochs):
