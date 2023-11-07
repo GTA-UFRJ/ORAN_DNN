@@ -30,6 +30,8 @@ def compute_overall_metrics(acc_mat):
     precision = np.sum(true_pos / np.sum(acc_mat, axis=0))
     recall = np.sum(true_pos / np.sum(acc_mat, axis=1))
 
+    print(precision, recall)
+
     f1 = (2*recall*precision)/(recall+precision)     
 
     return {"overall_precision": precision, "overall_recall": recall, "overall_f1": f1}
