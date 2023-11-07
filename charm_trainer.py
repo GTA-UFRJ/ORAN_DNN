@@ -35,14 +35,13 @@ def compute_metrics(labels, acc_mat, avg_loss, best_val_accuracy):
     precision = (corrects/ones.dot(acc_mat)).round(4)
     f1 = (2*recall*precision/(recall+precision)).round(4)
 
-    print(np.mean(recall[:-1]), np.mean(precision[:-1]), np.mean(f1[:-1]))
-    sys.exit()
-
     print(f"Accuracy: {acc}")
 
     print(f"\t\tRecall\tPrecision\tF1")
     
-    results = {"acc": acc, "avg_loss": avg_loss, "best_val_accuracy": best_val_accuracy}
+    results = {"acc": acc, "avg_loss": avg_loss, "best_val_accuracy": best_val_accuracy,
+    "overall_precision": np.mean(precision[:-1]), "overall_recall": np.mean(recall[:-1]), 
+    "overall_f1": np.mean(f1[:-1])}
 
     conf_mat = compute_conf_matrix(labels, acc_mat)
 
