@@ -8,23 +8,7 @@ import read_IQ as riq
 import torch.nn as nn
 import torch.optim as optim
 
-def compute_metrics(correct, total_inputs, total_loss, acc_mat, epoch, best_val_acc):
-    acc = correct/total_inputs
-    avg_loss = total_loss/total_inputs
-
-    corrects = np.diag(acc_mat)
-    acc = corrects.sum()/acc_mat.sum()
-    recall = (corrects/acc_mat.dot(ones)).round(4)
-    precision = (corrects/ones.dot(acc_mat)).round(4)
-    f1 = (2*recall*precision/(recall+precision)).round(4)
-
-    results = {"acc": acc, "recall": recall, "precision": precision, "f1": f1, "avg_loss": avg_loss, 
-    "epoch": epoch, "best_val_acc": best_val_acc}
-
-    return results
-
-
-def print_stats(acc_mat, name, epoch, tensorboard):
+def compute_metrics(labels, acc_mat, avg_loss, best_val_accuracy):
     classes = acc_mat.shape[0]
     ones = np.ones((classes, 1)).squeeze(-1)
 
@@ -34,18 +18,18 @@ def print_stats(acc_mat, name, epoch, tensorboard):
     precision = (corrects/ones.dot(acc_mat)).round(4)
     f1 = (2*recall*precision/(recall+precision)).round(4)
 
-    print(f"Epoch {epoch} on {name} dataset")
     print(f"Accuracy: {acc}")
-    if tensorboard:
-        tensorboard.add_scalar(f"accuracy/{name}", acc, epoch)
+
     print(f"\t\tRecall\tPrecision\tF1")
+    
+    results = {"acc": acc, "avg_loss": avg_loss, "best_val_accuracy": best_val_accuracy}
+
     for c in range(classes):
         print(f"Class {c}\t\t{recall[c]}\t{precision[c]}\t\t{f1[c]}")
-        if tensorboard:
-            tensorboard.add_scalar(f"recall_{c}/{name}", recall[c], epoch)
-            tensorboard.add_scalar(f"precision_{c}/{name}", precision[c], epoch)
-            tensorboard.add_scalar(f"f1_{c}/{name}", f1[c], epoch)
-            tensorboard.flush()
+        results.update({"recall_%s"%(labels[c]): recall[c], "precision_%s"%(labels[c]): precision[c],
+            "f1_%s"%(labels[c]): f1[c]})
+
+    return results
 
 
 class EarlyExitException(Exception):
@@ -63,15 +47,15 @@ class CharmTrainer(object):
                       else torch.device('cpu')
         
         self.model_name = model_name
-        self.history_path = "history_%s.csv"%(self.model_name)
-        self.modelSavePath = "dnn_model_%s.pt"%(self.model_name)
+        self.history_path = os.path.join(resultPath, "history_%s_own.csv"%(self.model_name))
+        self.modelSavePath = os.path.join(modelPath, "%s_model_own.pt"%(self.model_name))
+        self.metricsEvaluationPath = os.path.join(resultPath, "dnn_metrics_performance_test_set_own.csv")
 
         signal.signal(signal.SIGINT, self.exit_gracefully)
         signal.signal(signal.SIGTERM, self.exit_gracefully)
 
         self.chunk_size = chunk_size
-        self.loss_fn = nn.CrossEntropyLoss()  #dg.GamblerLoss(3)
-        #self.dg_coverage = dg_coverage
+        self.loss_fn = nn.CrossEntropyLoss()
 
         self.train_data = riq.IQDataset(data_folder=data_folder, chunk_size=chunk_size, stride=sample_stride)
         self.train_data.normalize(torch.tensor([-2.7671e-06, -7.3102e-07]), torch.tensor([0.0002, 0.0002]))
@@ -80,6 +64,10 @@ class CharmTrainer(object):
         self.val_data = riq.IQDataset(data_folder=data_folder, chunk_size=chunk_size, stride=sample_stride, subset='validation')
         self.val_data.normalize(torch.tensor([-2.7671e-06, -7.3102e-07]), torch.tensor([0.0002, 0.0002]))
         self.val_loader = torch.utils.data.DataLoader(self.val_data, batch_size=batch_size, shuffle=False, num_workers=loaders, pin_memory=True)
+
+        self.test_data = riq.IQDataset(data_folder=data_folder, chunk_size=chunk_size, stride=sample_stride, subset='test')
+        self.test_data.normalize(torch.tensor([-2.7671e-06, -7.3102e-07]), torch.tensor([0.0002, 0.0002]))
+        self.test_loader = torch.utils.data.DataLoader(self.val_data, batch_size=batch_size, shuffle=False, num_workers=loaders, pin_memory=True)
 
         self.running = False
         self.best_val_accuracy = 0.0
@@ -93,33 +81,35 @@ class CharmTrainer(object):
             self.model = rn_model.CharmBrain(self.chunk_size).to(self.device)
 
         elif(self.model_name == "cnn"):
-            self.model = ConvModel.CharmBrain(self.chunk_size).to(self.device)
+            self.model = cnn_model.ConvModel().to(self.device)
 
         else:
             raise Exception("This DNN model has not implemented yet.")
 
 
-  def select_dnn_architecture_model(self):
-    """
-    This method selects the backbone to insert the early exits.
-    """
 
-    architecture_dnn_model_dict = {"mobilenet": self.early_exit_mobilenet,
-                                   "resnet18": self.early_exit_resnet18,
-                                   "vgg16": self.early_exit_vgg16,
-                                   "resnet152": self.early_exit_resnet152}
-
-    self.pool_size = 7 if (self.model_name == "vgg16") else 1
-    return architecture_dnn_model_dict.get(self.model_name, self.invalid_model)
-
-
-
-    def save_history(self, metrics, subset):
-        metrics.update({"subset": subset})
+    def save_history(self, metrics, epoch, subset):
+        metrics.update({"epoch": epoch, "subset": subset})
         df = pd.DataFrame([metrics])
         df.to_csv(self.history_path, mode='a', header=not os.path.exists(self.history_path))
 
-    def training_loop2(self, epoch):
+    def save_metrics_performance_test(self, metrics):
+        df = pd.DataFrame([metrics])
+        df.to_csv(self.metricsEvaluationPath, mode='a', header=not os.path.exists(self.metricsEvaluationPath))
+
+    def save_model(self, metrics):
+        '''
+        load your model with:
+        >>> model = brain.CharmBrain()
+        >>> model.load_state_dict(torch.load(filename))
+        '''
+        save_dict  = {} 
+        save_dict.update(metrics)
+        save_dict.update({"best_val_accuracy": self.best_val_accuracy})
+        save_dict.update({"model_state_dict": self.model.state_dict()})
+        torch.save(save_dict, self.modelSavePath)
+
+    def training_loop(self, epoch):
 
         loss_train = 0.0
         correct, total = 0, 0
@@ -157,8 +147,7 @@ class CharmTrainer(object):
 
         print("Epoch: %s, Train Loss: %s, Train Accuracy: %s"%(epoch, metrics['avg_loss'], metrics['acc']))
 
-
-    def validation_loop2(self, epoch):
+    def validation_loop(self, epoch):
         
         self.model.eval()
         
@@ -198,33 +187,41 @@ class CharmTrainer(object):
             self.best_val_accuracy = metrics['acc']
 
 
-    def training_loop(epoch):
+    def test(self):
+        
+        self.model.eval()
+        correct = 0
+        total = 0
+        loss_total = 0
+        acc_mat = np.zeros((len(self.train_data.label), len(self.train_data.label)))
 
-        self.model.train()
-        loss_train = 0.0
-        for chunks, labels in self.train_loader:
-            if not self.running:
-                raise EarlyExitException
-            
-            chunks = chunks.to(self.device, non_blocking=True)
-            labels = labels.to(self.device, non_blocking=True)
+        with torch.no_grad():
+            for chunks, labels in tqdm(self.test_loader):
+                if not self.running:
+                    raise EarlyExitException
+                    
+                chunks = chunks.to(self.device, non_blocking=True)
+                labels = labels.to(self.device, non_blocking=True)
+                output = self.model(chunks)
+                loss = self.loss_fn(output, labels)
+                #predicted = dg.output2class(output, self.dg_coverage, 3)
+                loss_total += loss.item()
+                _, predicted = torch.max(output, dim=1)
+                total += labels.shape[0]
+                correct += int((predicted == labels).sum())
+                for i in range(labels.shape[0]):
+                    acc_mat[labels[i]][predicted[i]] += 1
 
-            output = self.model(chunks)
-            loss = self.loss_fn(output, labels)
-            self.optimizer.zero_grad()
-            loss.backward()
-            self.optimizer.step()
-            loss_train += loss.item()
-            
-            # clear variables
-            del chunks, labels, output, predicted
-            torch.cuda.empty_cache()
+        accuracy = correct/total
+        avg_loss = loss_total/len(self.test_loader)
 
-        avg_loss_train = loss_train/len(self.train_loader)
+        print(f"Test Accuracy: {accuracy}")
 
-        print("Epoch:%s, Train Loss: %s"%(epoch, avg_loss_train))
+        metrics = compute_metrics(self.labels, acc_mat, avg_loss, self.best_val_accuracy)
 
-    def train_val_loop(self, n_epochs):
+        self.save_metrics_performance_test(metrics)
+
+    def run(self, n_epochs):
         
         self.initialize_model()
         self.optimizer = optim.Adam(self.model.parameters())
@@ -234,51 +231,7 @@ class CharmTrainer(object):
             self.training_loop(epoch)
             self.validation_loop(epoch)
 
-    def validation_loop(self, epoch, include_train=True):
-        loaders = [('val', self.val_loader)]
-        
-        if (include_train):
-            loaders.append(('train', self.train_loader))
-
-        self.model.eval()
-        
-        for subset_name, loader in loaders:
-            correct = 0
-            total = 0
-            total_loss = 0
-            acc_mat = np.zeros((len(self.train_data.label), len(self.train_data.label)))
-
-            with torch.no_grad():
-                for chunks, labels in loader:
-                    if not self.running:
-                        raise EarlyExitException
-                    chunks = chunks.to(self.device, non_blocking=True)
-                    labels = labels.to(self.device, non_blocking=True)
-                    output = self.model(chunks)
-                    loss = self.loss_fn(output, labels)
-
-                    _, predicted = torch.max(output, dim=1)
-                    total += labels.shape[0]
-                    correct += int((predicted == labels).sum())
-                    total_loss += loss.item()
-
-                    for i in range(labels.shape[0]):
-                        acc_mat[labels[i]][predicted[i]] += 1
-
-                    # clear variables
-                    del chunks, labels, output, predicted
-                    torch.cuda.empty_cache()
-
-            metrics = compute_metrics(correct, total, total_loss, acc_mat, epoch, self.best_val_accuracy)
-
-            self.save_history(metrics, subset=subset_name)
-
-            print("Epoch: %s, Subset: %s, Loss: %s, Accuracy: %s"%(epoch, subset_name, metrics['avg_loss'], 
-                metrics['acc']))
-
-            if ((subset_name == 'val') and (metrics['acc'] > self.best_val_accuracy)):
-                self.best_val_accuracy = metrics['acc']
-                self.save_model(metrics)
+        self.test()
 
     def save_model(self, metrics):
 
@@ -299,7 +252,7 @@ def main(args):
         sample_stride=config.sample_stride,loaders=config.loaders, 
         dg_coverage=config.dg_coverage)
     
-    ct.train_val_loop(args.n_epochs)
+    ct.run(args.n_epochs)
 
 if (__name__ == "__main__"):
 

@@ -1,6 +1,6 @@
 from autocommand import autocommand
 #from torch.utils.tensorboard import SummaryWriter
-import rn_model, datetime, os, signal, torch, cnn_model, lstm
+import rn_model, datetime, os, signal, torch, cnn_model, lstm, conv_lstm
 #import deep_gambler as dg
 import numpy as np
 import readCharmDataset as riq
@@ -149,7 +149,7 @@ class CharmTrainer(object):
             self.model = cnn_model.ConvModel().to(self.device)
 
         elif(self.model_name == "lstm"):
-            self.model = lstm.LSTM(2, 2).to(self.device)
+            self.model = conv_lstm.ConvLSTM().to(self.device)
 
 
         #self.model = rn_model.CharmBrain(self.chunk_size).to(self.device)
