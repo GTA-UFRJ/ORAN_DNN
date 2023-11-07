@@ -78,11 +78,11 @@ class ConvLSTM(nn.Module):
 
         for layer in self.conv_layers:
             x = layer(x)
-            print(x.shape)
 
         for layer in self.lstm_layers:
             x, h, c = layer(x, h, c)
-            print(x.shape)
+
+        x = x.view(-1, 70)
 
         for layer in self.line_layers:
             x = layer(x)
