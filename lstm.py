@@ -99,7 +99,13 @@ class LSTM2(nn.Module):
         self.lstm = nn.LSTM(input_size=2, hidden_size=50, num_layers=1, batch_first=True)
         self.linear = nn.Linear(50, 3)
     def forward(self, x):
+        x = x.permute(0, 2, 1)
+
         x, _ = self.lstm(x)
+        x = x.permute(0, 2, 1)
+
+        x = x.view(-1, 50)
+
         x = self.linear(x)
         return x
 
