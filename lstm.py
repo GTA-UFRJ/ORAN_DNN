@@ -105,6 +105,7 @@ class SequenceModel(nn.Module):
 
     def forward(self, x):
         self.lstm.flatten_parameters()
+        x = x.permute(0, 2, 1)
 
         _, (hidden, _) = self.lstm(x)
         out = hidden[-1]
