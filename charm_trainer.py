@@ -195,6 +195,7 @@ class CharmTrainer(object):
                     loss.backward()
                     self.optimizer.step()
                     loss_train += loss.item()
+                    torch.cuda.empty_cache()
 
                 #if self.tensorboard:
                 #    self.tensorboard.add_scalar("Loss/train", loss_train/len(self.train_loader), epoch)
