@@ -93,25 +93,26 @@ class LSTM(nn.Module):
         return x
 
 
-class LSTM2(nn.Module):
-    def __init__(self):
+class SequenceModel(nn.Module):
+    def __init__(self, n_features, n_classes, n_hidden=256, n_layers=3):
         super().__init__()
-        self.lstm = nn.LSTM(input_size=2, hidden_size=5, num_layers=1, batch_first=True)
-        self.linear = nn.Linear(5, 3)
+
+        self.lstm = nn.LSTM(input_size=n_features, hidden_size=n_hidden,
+            num_layers=n_layers, batch_first=True,
+            dropout=0.75)
+
+        self.classifier = nn.Linear(n_hidden, n_classes)
+
     def forward(self, x):
-        x = x.permute(0, 2, 1)
+        self.lstm.flatten_parameters()
 
-        x, _ = self.lstm(x)
-        x = x.permute(0, 2, 1)
+        _, (hidden, _) = self.lstm(x)
+        out = hidden[-1]
+        print(out.shape)
+        return self.classifier(out)
 
-        print(x.shape)
 
-        x = x.view(-1, 5)
-
-        x = self.linear(x)
-        return x
-
-#x = torch.rand(1, 2, 20000)
-#model = LSTM(input_size=2, num_layers=2)(x)
+x = torch.rand(1, 2, 20000)
+model = SequenceModel(n_features=2, n_classes=3)(x)
 
 
