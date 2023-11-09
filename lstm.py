@@ -92,6 +92,17 @@ class LSTM(nn.Module):
 
         return x
 
+
+class LSTM2(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.lstm = nn.LSTM(input_size=2, hidden_size=50, num_layers=1, batch_first=True)
+        self.linear = nn.Linear(50, 3)
+    def forward(self, x):
+        x, _ = self.lstm(x)
+        x = self.linear(x)
+        return x
+
 #x = torch.rand(1, 2, 20000)
 #model = LSTM(input_size=2, num_layers=2)(x)
 
