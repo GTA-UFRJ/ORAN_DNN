@@ -96,15 +96,15 @@ class LSTM(nn.Module):
 class LSTM2(nn.Module):
     def __init__(self):
         super().__init__()
-        self.lstm = nn.LSTM(input_size=2, hidden_size=50, num_layers=1, batch_first=True)
-        self.linear = nn.Linear(50, 3)
+        self.lstm = nn.LSTM(input_size=2, hidden_size=20, num_layers=1, batch_first=True)
+        self.linear = nn.Linear(20, 3)
     def forward(self, x):
         x = x.permute(0, 2, 1)
 
         x, _ = self.lstm(x)
         x = x.permute(0, 2, 1)
 
-        x = x.view(-1, 50)
+        x = x.view(-1, 20)
 
         x = self.linear(x)
         return x
