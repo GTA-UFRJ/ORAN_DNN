@@ -103,11 +103,58 @@ class CharmEETrainer(object):
                 #print(f"{datetime.datetime.now()} Epoch {epoch}, loss {loss_train/len(self.train_loader)}")
                 print("Epoch: %s, Train Model Loss: %s, Train Model Acc: %s"%(epoch, avg_loss, avg_acc))
 
-                for i in range(self.model.n_branches):
+                for i in range(self.model.n_branches+1):
                     print("Branch %s: Acc: %s, Loss: %s"%(i+1, avg_ee_acc[i], avg_ee_loss[i])) 
 
-                #self.validate(epoch, train=True)
-                #self.model.train()
+                self.validate(epoch, train=True)
+                self.model.train()
+
+
+    def validate(self, epoch, train=True):
+        loaders = [('val', self.val_loader)]
+        if train:
+            loaders.append(('train', self.train_loader))
+
+        self.model.eval()
+        for name, loader in loaders:
+            correct = 0
+            total = 0
+            loss_total = 0
+            acc_mat = np.zeros((len(self.train_data.label), len(self.train_data.label)))
+            #acc_mat = np.zeros((len(loader.label), len(loader.label)))
+
+            with torch.no_grad():
+                for chunks, labels in tqdm(loader):
+                    if not self.running:
+                        raise EarlyExitException
+                    chunks = chunks.to(self.device, non_blocking=True)
+                    labels = labels.to(self.device, non_blocking=True)
+                    output = self.model(chunks)
+                    loss = self.loss_fn(output, labels)
+                    #predicted = dg.output2class(output, self.dg_coverage, 3)
+                    loss_total += loss.item()
+                    _, predicted = torch.max(output, dim=1)
+                    total += labels.shape[0]
+                    correct += int((predicted == labels).sum())
+                    for i in range(labels.shape[0]):
+                        acc_mat[labels[i]][predicted[i]] += 1
+
+
+            accuracy = correct/total
+            avg_loss = loss_total/len(loader)
+
+            print(f"Epoch {epoch} on {name} dataset")
+            print(f"{name} accuracy: {accuracy}")
+
+            metrics, _ = compute_metrics(self.labels, acc_mat, avg_loss, self.best_val_accuracy)
+            
+            self.save_history(metrics, epoch, subset=name)
+
+            if name == 'val' and accuracy>self.best_val_accuracy:
+                self.best_val_accuracy = accuracy
+                self.save_model(metrics)
+
+
 
     def execute(self, n_epochs):
 
