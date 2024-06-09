@@ -170,6 +170,7 @@ class CharmEETrainer(object):
         #total, loss_total = 0, 0
         acc_mat = [np.zeros((len(self.train_data.label), len(self.train_data.label))) for i in range(self.model.n_branches)]
         metrics_branches_dict = {}
+        model_loss_list, ee_loss_list, model_acc_list, ee_acc_list = [], [], [], []
 
         with torch.no_grad():
             for chunks, labels in tqdm(self.val_loader):
