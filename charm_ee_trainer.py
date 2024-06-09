@@ -118,7 +118,7 @@ class CharmEETrainer(object):
 def charm_trainer(model_name="cnn", id_gpu="0", data_folder="./", 
     modelPath="./models", resultPath="./results", n_epochs=25, batch_size=512, 
     chunk_size=20000, sample_stride=0, loaders=6, dg_coverage=0.75, tensorboard=None,
-    exit_type="bnpool", n_branches=2, n_epochs=100, n_classes=3, loss_weights_type="decrescent"):
+    exit_type="bnpool", n_branches=2, n_classes=3, loss_weights_type="decrescent"):
     
 
 
