@@ -8,19 +8,72 @@ from tqdm import tqdm
 import pandas as pd
 
 
+
+def compute_conf_matrix(labels, acc_mat):
+
+    conf_mat = {"Classes": labels}
+
+
+    for label in labels:
+        conf_mat.update({label: []})
+
+    for c in range(len(labels)):  
+        for j in range(len(labels)):
+            conf_mat[labels[c]].append(acc_mat[c, j])
+
+    return conf_mat
+
+
+def compute_performance_metrics_branches(n_branch, labels, acc_mat, avg_loss, best_val_accuracy, n_branches):
+
+    results_dict = {}
+
+    for i in range(n_branches):
+
+
+        classes = acc_mat[i].shape[0]
+        ones = np.ones((classes, 1)).squeeze(-1)
+
+        correct_branch = np.diag(acc_mat[i])
+        acc_branch = correct_branch.sum()/acc_mat[i].sum()
+        recall_branch = (correct_branch/acc_mat[i].dot(ones)).round(4)
+        precision_branch = (correct_branch/ones.dot(acc_mat[i])).round(4)
+        f1_branch = (2*recall_branch*precision_branch/(recall_branch+precision_branch)).round(4)
+
+        print(f"Accuracy Branch: %s: %s"%(i+1, acc_branch))
+
+        print(f"\t\tRecall\tPrecision\tF1")
+        
+        results = {"acc_branch_%s"%(n_branch): acc, "avg_loss_branch_%s": avg_loss[i], "best_val_accuracy": best_val_accuracy,
+        "overall_precision_branch": np.mean(precision[:-1]), "overall_recall": np.mean(recall[:-1]), 
+        "overall_f1": np.mean(f1[:-1])}
+
+        results_dict.update(results)
+
+        conf_mat = compute_conf_matrix(labels, acc_mat[i])
+
+        for c in range(classes):
+            print(f"Class {c}\t\t{recall[c]}\t{precision[c]}\t\t{f1[c]}")
+            results.update({"recall_%s"%(labels[c]): recall[c], "precision_%s"%(labels[c]): precision[c],
+                "f1_%s"%(labels[c]): f1[c]})
+
+    return results_dict, conf_mat
+
+
+
 class CharmEETrainer(object):
     def __init__(self, model, model_name, loss_weights, id_gpu, data_folder, modelPath, resultPath, batch_size, chunk_size, 
-        sample_stride, loaders, dg_coverage, tensorboard):
+        sample_stride, loaders, dg_coverage, tensorboard, loss_weight_type):
         
         self.device = (torch.device('cuda') if torch.cuda.is_available()
                       else torch.device('cpu'))
         
         self.model = model
         self.model_name = model_name
-        self.history_path = os.path.join(resultPath, "history_%s.csv"%(self.model_name))
-        self.modelSavePath = os.path.join(modelPath, "%s_model.pt"%(self.model_name))
-        self.metricsEvaluationPath = os.path.join(resultPath, "dnn_metrics_performance_test_set.csv")
-        self.confMatrixPath = os.path.join(resultPath, "%s_confusion_matrix.csv"%(self.model_name))
+        self.history_path = os.path.join(resultPath, "history_%s_%s.csv"%(self.model_name, loss_weight_type))
+        self.modelSavePath = os.path.join(modelPath, "%s_model_%s.pt"%(self.model_name, loss_weight_type))
+        self.metricsEvaluationPath = os.path.join(resultPath, "dnn_metrics_performance_%s.csv"%(loss_weight_type))
+        self.confMatrixPath = os.path.join(resultPath, "%s_confusion_matrix_%s.csv"%(self.model_name, loss_weight_type))
 
         self.labels = ['Clear', 'LTE', 'WiFi']
 
@@ -104,56 +157,70 @@ class CharmEETrainer(object):
                 print("Epoch: %s, Train Model Loss: %s, Train Model Acc: %s"%(epoch, avg_loss, avg_acc))
 
                 for i in range(self.model.n_branches+1):
-                    print("Branch %s: Acc: %s, Loss: %s"%(i+1, avg_ee_acc[i], avg_ee_loss[i])) 
+                    print("Branch %s: Train Acc: %s, Train Loss: %s"%(i+1, avg_ee_acc[i], avg_ee_loss[i])) 
 
-                #self.validate(epoch, train=True)
-                #self.model.train()
+                self.validate(epoch)
+                self.model.train()
 
 
-    def validate(self, epoch, train=True):
-        loaders = [('val', self.val_loader)]
-        if train:
-            loaders.append(('train', self.train_loader))
+    def validate(self, epoch):
 
         self.model.eval()
-        for name, loader in loaders:
-            correct = 0
-            total = 0
-            loss_total = 0
-            acc_mat = np.zeros((len(self.train_data.label), len(self.train_data.label)))
-            #acc_mat = np.zeros((len(loader.label), len(loader.label)))
+        correct_branch = np.zeros(self.model.n_branches)
+        #total, loss_total = 0, 0
+        acc_mat = [np.zeros((len(self.train_data.label), len(self.train_data.label))) for i in range(self.model.n_branches)]
+        metrics_branches_dict = {}
 
-            with torch.no_grad():
-                for chunks, labels in tqdm(loader):
-                    if not self.running:
-                        raise EarlyExitException
-                    chunks = chunks.to(self.device, non_blocking=True)
-                    labels = labels.to(self.device, non_blocking=True)
-                    output = self.model(chunks)
-                    loss = self.loss_fn(output, labels)
-                    #predicted = dg.output2class(output, self.dg_coverage, 3)
-                    loss_total += loss.item()
-                    _, predicted = torch.max(output, dim=1)
-                    total += labels.shape[0]
-                    correct += int((predicted == labels).sum())
+        with torch.no_grad():
+            for chunks, labels in tqdm(loader):
+                chunks = chunks.to(self.device, non_blocking=True)
+                labels = labels.to(self.device, non_blocking=True)
+
+
+                output_list, conf_list, class_list = self.model.forwardTraining(chunks)
+                model_loss, ee_loss, model_acc, ee_acc = self.compute_metrics(output_list, conf_list, class_list, labels)
+
+                model_loss_list.append(float(model_loss.item())), ee_loss_list.append(ee_loss), model_acc_list.append(model_acc), ee_acc_list.append(ee_acc)
+
+                for j in range(self.model.n_branches): 
+                    _, predicted = torch.max(output_list[j], dim=1)
+                    correct_branch[j] += int((predicted == labels).sum())
                     for i in range(labels.shape[0]):
-                        acc_mat[labels[i]][predicted[i]] += 1
+                        acc_mat[j][labels[i]][predicted[i]] += 1
 
+        avg_loss, avg_ee_loss = round(np.mean(model_loss_list), 4), np.mean(ee_loss_list, axis=0)
+        avg_acc, avg_ee_acc = round(np.mean(model_acc_list), 2), np.mean(ee_acc_list, axis=0)
 
-            accuracy = correct/total
-            avg_loss = loss_total/len(loader)
+        print("Epoch: %s, Val Model Loss: %s, Val Model Acc: %s"%(epoch, avg_loss, avg_acc))
+        for j in range(self.model.n_branches+1):
+            print("Branch %s: Val Acc: %s, Val Loss: %s"%(i+1, avg_ee_acc[i], avg_ee_loss[i])) 
 
-            print(f"Epoch {epoch} on {name} dataset")
-            print(f"{name} accuracy: {accuracy}")
-
-            metrics, _ = compute_metrics(self.labels, acc_mat, avg_loss, self.best_val_accuracy)
+        metrics_branches, _ = compute_performance_metrics(self.labels, acc_mat, avg_ee_loss, self.best_val_accuracy, self.model.n_branches)
             
-            self.save_history(metrics, epoch, subset=name)
+        self.save_history(metrics_branches_dict, epoch)
 
-            if name == 'val' and accuracy>self.best_val_accuracy:
-                self.best_val_accuracy = accuracy
-                self.save_model(metrics)
+        if (avg_acc > self.best_val_accuracy):
+            self.best_val_accuracy = avg_acc
+            self.save_model(metrics_branches)
 
+    def save_history(self, metrics, epoch):
+        metrics.update({"epoch": epoch})
+        df = pd.DataFrame([metrics])
+        df.to_csv(self.history_path, mode='a', header=not os.path.exists(self.history_path))
+
+    def save_model(self, metrics):
+        '''
+        load your model with:
+        >>> model = brain.CharmBrain()
+        >>> model.load_state_dict(torch.load(filename))
+        '''
+        save_dict  = {}
+        for i in range(self.model.n_branches+1): 
+            save_dict.update(metrics[i])
+        
+        save_dict.update({"best_val_accuracy": self.best_val_accuracy})
+        save_dict.update({"model_state_dict": self.model.state_dict()})
+        torch.save(save_dict, self.modelSavePath)
 
 
     def execute(self, n_epochs):
@@ -166,12 +233,9 @@ class CharmEETrainer(object):
 
 @autocommand(__name__)
 def charm_trainer(model_name="cnn", id_gpu="0", data_folder="./oran_dataset", 
-    modelPath="./models", resultPath="./results", n_epochs=25, batch_size=512, 
+    modelPath="./models", resultPath="./results", n_epochs=100, batch_size=512, 
     chunk_size=20000, sample_stride=0, loaders=6, dg_coverage=0.75, tensorboard=None,
     exit_type="bnpool", n_branches=2, n_classes=3, loss_weights_type="decrescent"):
-    
-
-
 
     device = torch.device('cuda' if (torch.cuda.is_available()) else 'cpu')
     exit_positions = [5, 11]
@@ -186,5 +250,5 @@ def charm_trainer(model_name="cnn", id_gpu="0", data_folder="./oran_dataset",
     
     
     ct = CharmEETrainer(ee_model, model_name, loss_weights, id_gpu, data_folder, modelPath, 
-                        resultPath, batch_size, chunk_size, sample_stride,loaders, dg_coverage, tensorboard)
+                        resultPath, batch_size, chunk_size, sample_stride,loaders, dg_coverage, tensorboard, loss_weights_type)
     ct.execute(n_epochs)
