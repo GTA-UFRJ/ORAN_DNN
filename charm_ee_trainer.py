@@ -44,18 +44,18 @@ def compute_performance_metrics_branches(labels, acc_mat, avg_loss, best_val_acc
 
         print(f"\t\tRecall\tPrecision\tF1")
         
-        results = {"acc_branch_%s"%(i+1): acc, "avg_loss_branch_%s"%(i+1): avg_loss[i], "best_val_accuracy": best_val_accuracy,
-        "precision_branch_%s"%(i+1): np.mean(precision[:-1]), "recall_branch_%s"%(i+1): np.mean(recall[:-1]), 
-        "f1_branch_%s"%(i+1): np.mean(f1[:-1])}
+        results = {"acc_branch_%s"%(i+1): acc_branch, "avg_loss_branch_%s"%(i+1): avg_loss[i], "best_val_accuracy": best_val_accuracy,
+        "precision_branch_%s"%(i+1): np.mean(precision_branch[:-1]), "recall_branch_%s"%(i+1): np.mean(recall_branch[:-1]), 
+        "f1_branch_%s"%(i+1): np.mean(f1_branch[:-1])}
 
         results_dict.update(results)
 
         conf_mat = compute_conf_matrix(labels, acc_mat[i])
 
         for c in range(classes):
-            print(f"Class {c}\t\t{recall[c]}\t{precision[c]}\t\t{f1[c]}")
-            results.update({"recall_%s"%(labels[c]): recall[c], "precision_%s"%(labels[c]): precision[c],
-                "f1_%s"%(labels[c]): f1[c]})
+            print(f"Class {c}\t\t{recall_branch[c]}\t{precision_branch[c]}\t\t{f1_branch[c]}")
+            results.update({"recall_%s"%(labels[c]): recall_branch[c], "precision_%s"%(labels[c]): precision_branch[c],
+                "f1_%s"%(labels[c]): f1_branch[c]})
 
     return results_dict, conf_mat
 
