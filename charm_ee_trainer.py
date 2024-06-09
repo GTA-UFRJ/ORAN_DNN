@@ -60,7 +60,7 @@ class CharmEETrainer(object):
         model_loss = 0
         ee_loss, acc_branches = [], []
 
-        for i, (output, inf_class, weight) in enumerate(zip(output_list, class_list, loss_weights), 1):
+        for i, (output, inf_class, weight) in enumerate(zip(output_list, class_list, self.loss_weights), 1):
             loss_branch = self.loss_fn(output, target)
             model_loss += weight*loss_branch
 
