@@ -47,9 +47,9 @@ class CharmEETrainer(object):
 
 
         lr = [0.01, 0.01]
-        self.optimizer = optim.SGD([{'params': ee_model.stages.parameters(), 'lr': lr[0]}, 
-         {'params': ee_model.exits.parameters(), 'lr': lr[0]},
-          {'params': ee_model.classifier.parameters(), 'lr': lr[0]}], momentum=0.9, weight_decay=2e-05)
+        self.optimizer = optim.SGD([{'params': self.model.stages.parameters(), 'lr': lr[0]}, 
+         {'params': self.model.exits.parameters(), 'lr': lr[0]},
+          {'params': self.model.classifier.parameters(), 'lr': lr[0]}], momentum=0.9, weight_decay=2e-05)
 
 
 
