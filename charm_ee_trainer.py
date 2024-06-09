@@ -204,7 +204,7 @@ class CharmEETrainer(object):
 
         if (avg_acc > self.best_val_accuracy):
             self.best_val_accuracy = avg_acc
-            self.save_model(metrics_branches)
+            #self.save_model(metrics_branches)
 
     def save_history(self, metrics, epoch):
         metrics.update({"epoch": epoch})
