@@ -24,7 +24,7 @@ def compute_conf_matrix(labels, acc_mat):
     return conf_mat
 
 
-def compute_performance_metrics_branches(n_branch, labels, acc_mat, avg_loss, best_val_accuracy, n_branches):
+def compute_performance_metrics_branches(labels, acc_mat, avg_loss, best_val_accuracy, n_branches):
 
     results_dict = {}
 
