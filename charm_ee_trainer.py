@@ -217,9 +217,7 @@ class CharmEETrainer(object):
         >>> model.load_state_dict(torch.load(filename))
         '''
         save_dict  = {}
-        for i in range(self.model.n_branches+1): 
-            save_dict.update(metrics[i])
-        
+        save_dict.update(metrics[i])
         save_dict.update({"best_val_accuracy": self.best_val_accuracy})
         save_dict.update({"model_state_dict": self.model.state_dict()})
         torch.save(save_dict, self.modelSavePath)
@@ -227,8 +225,8 @@ class CharmEETrainer(object):
 
     def execute(self, n_epochs):
 
-      #self.training_loop(n_epochs)
-      self.validate(n_epochs)
+      self.training_loop(n_epochs)
+      #self.validate(n_epochs)
       #self.test()
 
 
