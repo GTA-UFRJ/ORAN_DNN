@@ -100,8 +100,11 @@ class CharmEETrainer(object):
                 avg_loss, avg_ee_loss = round(np.mean(model_loss_list), 4), np.mean(ee_loss_list, axis=0)
                 avg_acc, avg_ee_acc = round(np.mean(model_acc_list), 2), np.mean(ee_acc_list, axis=0)
 
-                print(f"{datetime.datetime.now()} Epoch {epoch}, loss {loss_train/len(self.train_loader)}")
+                #print(f"{datetime.datetime.now()} Epoch {epoch}, loss {loss_train/len(self.train_loader)}")
                 print("Epoch: %s, Train Model Loss: %s, Train Model Acc: %s"%(epoch, avg_loss, avg_acc))
+
+                for i in range(self.model.n_branches):
+                    print("Branch %s: Acc: %s, Loss: %s"%(i+1, avg_ee_acc[i], avg_ee_loss[i])) 
 
                 #self.validate(epoch, train=True)
                 #self.model.train()
