@@ -29,15 +29,15 @@ class CharmEETrainer(object):
         self.dg_coverage = dg_coverage
         self.loss_weights = loss_weights
 
-        self.train_data = IQDataset(data_folder=data_folder, chunk_size=chunk_size, stride=sample_stride)
+        self.train_data = riq.IQDataset(data_folder=data_folder, chunk_size=chunk_size, stride=sample_stride)
         self.train_data.normalize(torch.tensor([-2.7671e-06, -7.3102e-07]), torch.tensor([0.0002, 0.0002]))
         self.train_loader = torch.utils.data.DataLoader(self.train_data, batch_size=batch_size, shuffle=True, num_workers=loaders, pin_memory=True)
 
-        self.val_data = IQDataset(data_folder=data_folder, chunk_size=chunk_size, stride=sample_stride, subset='validation')
+        self.val_data = riq.IQDataset(data_folder=data_folder, chunk_size=chunk_size, stride=sample_stride, subset='validation')
         self.val_data.normalize(torch.tensor([-2.7671e-06, -7.3102e-07]), torch.tensor([0.0002, 0.0002]))
         self.val_loader = torch.utils.data.DataLoader(self.val_data, batch_size=batch_size, shuffle=False, num_workers=loaders, pin_memory=True)
 
-        self.test_data = IQDataset(data_folder=data_folder, chunk_size=chunk_size, stride=sample_stride, subset='test')
+        self.test_data = riq.IQDataset(data_folder=data_folder, chunk_size=chunk_size, stride=sample_stride, subset='test')
         self.test_data.normalize(torch.tensor([-2.7671e-06, -7.3102e-07]), torch.tensor([0.0002, 0.0002]))
         self.test_loader = torch.utils.data.DataLoader(self.val_data, batch_size=batch_size, shuffle=False, num_workers=loaders, pin_memory=True)
 
