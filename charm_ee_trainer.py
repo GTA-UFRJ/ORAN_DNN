@@ -82,7 +82,7 @@ class CharmEETrainer(object):
                     labels = labels.to(self.device, non_blocking=True)
 
 
-                    output_list, conf_list, class_list = self.model(chunks)
+                    output_list, conf_list, class_list = self.model.forwardTraining(chunks)
                     model_loss, ee_loss, model_acc, ee_acc = self.compute_metrics(output_list, conf_list, class_list, labels)
 
                     self.optimizer.zero_grad()
