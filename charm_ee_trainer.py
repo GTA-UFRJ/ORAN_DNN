@@ -194,7 +194,7 @@ class CharmEETrainer(object):
 
         print("Epoch: %s, Val Model Loss: %s, Val Model Acc: %s"%(epoch, avg_loss, avg_acc))
         for j in range(self.model.n_branches+1):
-            print("Branch %s: Val Acc: %s, Val Loss: %s"%(i+1, avg_ee_acc[i], avg_ee_loss[i])) 
+            print("Branch %s: Val Acc: %s, Val Loss: %s"%(j+1, avg_ee_acc[j], avg_ee_loss[j])) 
 
         metrics_branches, _ = compute_performance_metrics(self.labels, acc_mat, avg_ee_loss, self.best_val_accuracy, self.model.n_branches)
             
@@ -226,9 +226,9 @@ class CharmEETrainer(object):
 
     def execute(self, n_epochs):
 
-      self.training_loop(n_epochs)
-      #self.validate(n_epochs-1, train=True)
-      self.test()
+      #self.training_loop(n_epochs)
+      self.validate(n_epochs)
+      #self.test()
 
 
 
