@@ -44,9 +44,9 @@ def compute_performance_metrics_branches(labels, acc_mat, avg_loss, best_val_acc
 
         print(f"\t\tRecall\tPrecision\tF1")
         
-        results = {"acc_branch_%s"%(n_branch): acc, "avg_loss_branch_%s": avg_loss[i], "best_val_accuracy": best_val_accuracy,
-        "overall_precision_branch": np.mean(precision[:-1]), "overall_recall": np.mean(recall[:-1]), 
-        "overall_f1": np.mean(f1[:-1])}
+        results = {"acc_branch_%s"%(i+1): acc, "avg_loss_branch_%s"%(i+1): avg_loss[i], "best_val_accuracy": best_val_accuracy,
+        "precision_branch_%s"%(i+1): np.mean(precision[:-1]), "recall_branch_%s"%(i+1): np.mean(recall[:-1]), 
+        "f1_branch_%s"%(i+1): np.mean(f1[:-1])}
 
         results_dict.update(results)
 
