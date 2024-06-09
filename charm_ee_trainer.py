@@ -161,7 +161,7 @@ class CharmEETrainer(object):
                 for i in range(self.model.n_branches+1):
                     print("Branch %s: Train Acc: %s, Train Loss: %s"%(i+1, avg_ee_acc[i], avg_ee_loss[i])) 
 
-                #self.validate(epoch)
+                self.validate(epoch)
                 self.model.train()
 
 
