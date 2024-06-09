@@ -1,5 +1,5 @@
 from autocommand import autocommand
-import rn_model, datetime, os, signal, torch, cnn_model, lstm, conv_lstm, sys, conv_rn
+import rn_model, datetime, os, signal, torch, cnn_model, lstm, conv_lstm, sys, conv_rn, ee_dnns
 import numpy as np
 import readCharmDataset as riq
 import torch.nn as nn
@@ -132,7 +132,7 @@ def charm_trainer(model_name="cnn", id_gpu="0", data_folder="./",
     loss_weights = loss_weights_dict[loss_weights_type]
 
 
-    ee_model = Early_Exit_DNN(model_name, n_classes, n_branches, exit_type, device, exit_positions=exit_positions)    
+    ee_model = ee_dnns.Early_Exit_DNN(model_name, n_classes, n_branches, exit_type, device, exit_positions=exit_positions)    
     
     
     ct = CharmEETrainer(ee_model, model_name, loss_weights, id_gpu, data_folder, modelPath, 
