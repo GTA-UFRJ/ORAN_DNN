@@ -172,7 +172,7 @@ class CharmEETrainer(object):
         metrics_branches_dict = {}
 
         with torch.no_grad():
-            for chunks, labels in tqdm(loader):
+            for chunks, labels in tqdm(self.val_loader):
                 chunks = chunks.to(self.device, non_blocking=True)
                 labels = labels.to(self.device, non_blocking=True)
 
