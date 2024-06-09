@@ -71,10 +71,10 @@ class CharmEETrainer(object):
         
         self.model = model
         self.model_name = model_name
-        self.history_path = os.path.join(resultPath, "history_%s_%s.csv"%(self.model_name, loss_weight_type))
-        self.modelSavePath = os.path.join(modelPath, "%s_model_%s.pt"%(self.model_name, loss_weight_type))
-        self.metricsEvaluationPath = os.path.join(resultPath, "dnn_metrics_performance_%s.csv"%(loss_weight_type))
-        self.confMatrixPath = os.path.join(resultPath, "%s_confusion_matrix_%s.csv"%(self.model_name, loss_weight_type))
+        self.history_path = os.path.join(resultPath, "history_%s_%s_full.csv"%(self.model_name, loss_weight_type))
+        self.modelSavePath = os.path.join(modelPath, "%s_model_%s_full.pt"%(self.model_name, loss_weight_type))
+        self.metricsEvaluationPath = os.path.join(resultPath, "dnn_metrics_performance_%s_full.csv"%(loss_weight_type))
+        self.confMatrixPath = os.path.join(resultPath, "%s_confusion_matrix_%s_full.csv"%(self.model_name, loss_weight_type))
 
         self.labels = ['Clear', 'LTE', 'WiFi']
 
@@ -204,7 +204,7 @@ class CharmEETrainer(object):
 
         if (avg_acc > self.best_val_accuracy):
             self.best_val_accuracy = avg_acc
-            #self.save_model(metrics_branches)
+            self.save_model(metrics_branches)
 
     def save_history(self, metrics, epoch):
         metrics.update({"epoch": epoch})
@@ -234,7 +234,7 @@ class CharmEETrainer(object):
 
 @autocommand(__name__)
 def charm_trainer(model_name="cnn", id_gpu="0", data_folder="./oran_dataset", 
-    modelPath="./models", resultPath="./results", n_epochs=100, batch_size=512, 
+    modelPath="./models", resultPath="./results", n_epochs=25, batch_size=512, 
     chunk_size=20000, sample_stride=0, loaders=6, dg_coverage=0.75, tensorboard=None,
     exit_type="bnpool", n_branches=2, n_classes=3, loss_weights_type="decrescent"):
 
