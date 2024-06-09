@@ -40,9 +40,9 @@ def compute_performance_metrics_branches(labels, acc_mat, avg_loss, best_val_acc
         precision_branch = (correct_branch/ones.dot(acc_mat[i])).round(4)
         f1_branch = (2*recall_branch*precision_branch/(recall_branch+precision_branch)).round(4)
 
-        print(f"Accuracy Branch: %s: %s"%(i+1, acc_branch))
+        #print(f"Accuracy Branch: %s: %s"%(i+1, acc_branch))
 
-        print(f"\t\tRecall\tPrecision\tF1")
+        #print(f"\t\tRecall\tPrecision\tF1")
         
         results = {"acc_branch_%s"%(i+1): acc_branch, "avg_loss_branch_%s"%(i+1): avg_loss[i], "best_val_accuracy": best_val_accuracy,
         "precision_branch_%s"%(i+1): np.mean(precision_branch[:-1]), "recall_branch_%s"%(i+1): np.mean(recall_branch[:-1]), 
