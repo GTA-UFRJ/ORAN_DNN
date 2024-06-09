@@ -52,11 +52,11 @@ def compute_performance_metrics_branches(labels, acc_mat, avg_loss, best_val_acc
 
         conf_mat = compute_conf_matrix(labels, acc_mat[i])
 
-        for c in range(classes-1):
-            print(c)
-            print(f"Class {c}\t\t{recall_branch[c]}\t{precision_branch[c]}\t\t{f1_branch[c]}")
-            results.update({"recall_%s"%(labels[c]): recall_branch[c], "precision_%s"%(labels[c]): precision_branch[c],
-                "f1_%s"%(labels[c]): f1_branch[c]})
+        #for c in range(classes-1):
+        #    print(c)
+        #    print(f"Class {c}\t\t{recall_branch[c]}\t{precision_branch[c]}\t\t{f1_branch[c]}")
+        ##    results.update({"recall_%s"%(labels[c]): recall_branch[c], "precision_%s"%(labels[c]): precision_branch[c],
+        #        "f1_%s"%(labels[c]): f1_branch[c]})
 
     return results_dict, conf_mat
 
