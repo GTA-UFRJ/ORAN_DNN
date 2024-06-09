@@ -196,7 +196,7 @@ class CharmEETrainer(object):
         for j in range(self.model.n_branches+1):
             print("Branch %s: Val Acc: %s, Val Loss: %s"%(j+1, avg_ee_acc[j], avg_ee_loss[j])) 
 
-        metrics_branches, _ = compute_performance_metrics(self.labels, acc_mat, avg_ee_loss, self.best_val_accuracy, self.model.n_branches)
+        metrics_branches, _ = compute_performance_metrics_branches(self.labels, acc_mat, avg_ee_loss, self.best_val_accuracy, self.model.n_branches)
             
         self.save_history(metrics_branches_dict, epoch)
 
