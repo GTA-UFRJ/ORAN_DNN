@@ -87,7 +87,7 @@ class CharmEETrainer(object):
 
                     self.optimizer.zero_grad()
                     model_loss.backward()
-                    self.optimizer.step
+                    self.optimizer.step()
                     torch.cuda.empty_cache()
 
                     model_loss_list.append(float(model_loss.item())), ee_loss_list.append(ee_loss)
