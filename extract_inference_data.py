@@ -76,9 +76,9 @@ def main(args):
 
 	inf_data_path = os.path.join(inf_data_dir_path, "inf_data_ee_%s_%s.csv"%(args.model_name, args.loss_weights_type))
 		
-	test_data = riq.IQDataset(data_folder="./oran_dataset", chunk_size=chunk_size, stride=sample_stride, subset='test')
+	test_data = riq.IQDataset(data_folder="./oran_dataset", chunk_size=20000, stride=0, subset='test')
 	test_data.normalize(torch.tensor([-2.7671e-06, -7.3102e-07]), torch.tensor([0.0002, 0.0002]))
-	test_loader = torch.utils.data.DataLoader(val_data, batch_size=1, shuffle=False, num_workers=loaders, pin_memory=True)
+	test_loader = torch.utils.data.DataLoader(test_data, batch_size=1, shuffle=False, num_workers=loaders, pin_memory=True)
 
 	ee_model = load_eednn_model(args, n_classes, model_path, device)
 
