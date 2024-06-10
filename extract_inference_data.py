@@ -117,7 +117,7 @@ if (__name__ == "__main__"):
 	parser.add_argument('--exit_type', type=str, default="bnpool", 
 		help='Exit Type. Default: bnpool')
 
-	parser.add_argument('--distribution', type=str, default=config.distribution, 
+	parser.add_argument('--distribution', type=str, default="predefined", 
 		help='Distribution of the early exits. Default: predefined')
 
 	parser.add_argument('--model_id', type=int, help='Model_id.')
