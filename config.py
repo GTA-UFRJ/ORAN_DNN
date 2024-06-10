@@ -9,3 +9,4 @@ loaders = 4
 dg_coverage = 0.75
 tensorboard = None
 model_name = "rn"
+exit_positions = [5, 11]
