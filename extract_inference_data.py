@@ -80,7 +80,7 @@ def main(args):
 	test_data.normalize(torch.tensor([-2.7671e-06, -7.3102e-07]), torch.tensor([0.0002, 0.0002]))
 	test_loader = torch.utils.data.DataLoader(test_data, batch_size=1, shuffle=False, num_workers=6, pin_memory=True)
 
-	ee_model = load_eednn_model(args, n_classes, model_path, device)
+	ee_model = load_eednn_model(args, 3, model_path, device)
 
 	threshold_list = np.linspace(0.6, 0.95, 8)
 	threshold_list = np.append(threshold_list, 1)
