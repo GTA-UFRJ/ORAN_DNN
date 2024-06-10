@@ -48,13 +48,10 @@ def extracting_ee_inference_data(args, test_loader, ee_model, device, threshold)
 	# Returns confidences and predictions into a DataFrame.
 	return df
 
-
-
-
 def load_eednn_model(args, n_classes, model_path, device):
 
 	#Instantiate the Early-exit DNN model.
-    ee_model = ee_dnns.Early_Exit_DNN(args.model_name, 3, args.n_branches, args.exit_type, device, exit_positions=config.exit_positions)    
+	ee_model = ee_dnns.Early_Exit_DNN(args.model_name, 3, args.n_branches, args.exit_type, device, exit_positions=config.exit_positions)    
 
 	#Load the trained early-exit DNN model.
 	ee_model.load_state_dict(torch.load(model_path, map_location=device)["model_state_dict"])
