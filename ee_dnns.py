@@ -172,3 +172,63 @@ class Early_Exit_DNN(nn.Module):
 
     return output_list, conf_list, class_list
 
+
+	def forwardEval(self, x):
+		"""
+		This method runs the DNN model during the training phase.
+		x (tensor): input image
+		"""
+
+		output_list, conf_list, class_list, inf_time_list  = [], [], [], []
+		starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+
+		cumulative_inf_time = 0.0
+
+		for i, exitBlock in enumerate(self.exits):
+
+			#This lines starts a timer to measure processing time
+			starter.record()
+
+			#This line process a DNN backbone until the (i+1)-th side branch (early-exit)
+			x = self.stages[i](x)
+
+			#This runs the early-exit classifications (prediction)
+			output_branch = exitBlock(x)
+			
+			#This obtains the classification and confidence value in each side branch
+			#Confidence is the maximum probability of belongs one of the predefined classes
+			#The prediction , a.k.a inference_class,  is the argmax output. 
+			conf_branch, prediction = torch.max(self.softmax(output_branch), 1)
+
+			#This line terminates the timer started previously.
+			ender.record()
+			torch.cuda.synchronize()
+			curr_time = starter.elapsed_time(ender)
+
+			#This apprends the gathered confidences and classifications into a list
+			output_list.append(output_branch), conf_list.append(conf_branch), class_list.append(prediction), inf_time_list.append(curr_time)
+
+		#This measures the processing time for the last piece of DNN backbone
+		starter.record()
+
+		#This executes the last piece of DNN backbone
+		x = self.stages[-1](x)
+
+		x = torch.flatten(x, 1)
+
+		#This generates the last-layer classification
+		output = self.classifier(x)
+		infered_conf, infered_class = torch.max(self.softmax(output), 1)
+
+		#This ends the timer
+		ender.record()
+		torch.cuda.synchronize()
+		curr_time = starter.elapsed_time(ender)
+
+
+		output_list.append(output)
+		conf_list.append(infered_conf), class_list.append(infered_class), inf_time_list.append(curr_time)
+
+		cumulative_inf_time_list = np.cumsum(inf_time_list)
+
+
