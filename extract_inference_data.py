@@ -3,6 +3,7 @@ from tqdm import tqdm
 import numpy as np
 import torch.nn as nn
 import pandas as pd
+import readCharmDataset as riq
 
 
 def extracting_ee_inference_data(args, test_loader, ee_model, device, threshold):
