@@ -6,7 +6,7 @@ import pandas as pd
 import readCharmDataset as riq
 
 
-def extracting_ee_inference_data(args, test_loader, ee_model, device, threshold):
+def extracting_ee_inference_data(args, test_loader, model, device, threshold):
 
 	n_exits = args.n_branches + 1	
 	conf_list, correct_list, delta_inf_time_list, cum_inf_time_list = [], [], [], []
