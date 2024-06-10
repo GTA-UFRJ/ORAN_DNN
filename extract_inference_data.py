@@ -110,7 +110,7 @@ if (__name__ == "__main__"):
 
 	parser.add_argument('--seed', type=int, default=42, help='Seed.')
 
-	parser.add_argument('--use_gpu', type=bool, default=True, help='Use GPU? Default: %s'%(config.use_gpu))
+	parser.add_argument('--use_gpu', type=bool, default=True, help='Use GPU? Default: True')
 
 	parser.add_argument('--n_branches', type=int, default=2, help='Number of side branches.')
 
