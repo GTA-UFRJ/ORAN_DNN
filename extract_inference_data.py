@@ -82,15 +82,9 @@ def main(args):
 
 	ee_model = load_eednn_model(args, 3, model_path, device)
 
-	threshold_list = np.linspace(0.6, 0.95, 8)
-	threshold_list = np.append(threshold_list, 1)
+	df_inf_data = extracting_ee_inference_data(args, test_loader, ee_model, device, threshold)
 
-	for threshold in threshold_list:
-		print("Threshold: %s"%(threshold))
-
-		df_inf_data = extracting_ee_inference_data(args, test_loader, ee_model, device, threshold)
-
-		df_inf_data.to_csv(inf_data_path, mode='a', header=not os.path.exists(inf_data_path))
+	df_inf_data.to_csv(inf_data_path, mode='a', header=not os.path.exists(inf_data_path))
 
 
 
