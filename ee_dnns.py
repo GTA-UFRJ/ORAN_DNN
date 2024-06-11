@@ -207,7 +207,7 @@ class Early_Exit_DNN(nn.Module):
       curr_time = starter.elapsed_time(ender)
 
       #This apprends the gathered confidences and classifications into a list
-      output_list.append(output_branch), conf_list.append(conf_branch.item()), class_list.append(prediction.item()), inf_time_list.append(curr_time)
+      output_list.append(output_branch), conf_list.append(conf_branch.item()), class_list.append(prediction), inf_time_list.append(curr_time)
 
     #This measures the processing time for the last piece of DNN backbone
     starter.record()
@@ -227,7 +227,7 @@ class Early_Exit_DNN(nn.Module):
     torch.cuda.synchronize()
     curr_time = starter.elapsed_time(ender)
 
-    output_list.append(output), conf_list.append(infered_conf.item()), class_list.append(infered_class.item()), inf_time_list.append(curr_time)
+    output_list.append(output), conf_list.append(infered_conf.item()), class_list.append(infered_class), inf_time_list.append(curr_time)
 
     cumulative_inf_time_list = np.cumsum(inf_time_list)
 
