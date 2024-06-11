@@ -6,7 +6,7 @@ import pandas as pd
 import readCharmDataset as riq
 
 
-def extracting_ee_inference_data(args, test_loader, model, device, threshold):
+def extracting_ee_inference_data(args, test_loader, model, device):
 
 	n_exits = args.n_branches + 1	
 	conf_list, correct_list, delta_inf_time_list, cum_inf_time_list = [], [], [], []
@@ -34,7 +34,7 @@ def extracting_ee_inference_data(args, test_loader, model, device, threshold):
 
 	print("Accuracy: %s"%(accuracy_branches))
 	
-	result_dict = {"threshold": len(target_list)*[threshold], "device": len(target_list)*[str(device)], "target": target_list}
+	result_dict = {"device": len(target_list)*[str(device)], "target": target_list}
 
 	for i in range(n_exits):
 		result_dict["conf_branch_%s"%(i+1)] = conf_list[:, i]
@@ -82,7 +82,7 @@ def main(args):
 
 	ee_model = load_eednn_model(args, 3, model_path, device)
 
-	df_inf_data = extracting_ee_inference_data(args, test_loader, ee_model, device, threshold)
+	df_inf_data = extracting_ee_inference_data(args, test_loader, ee_model, device)
 
 	df_inf_data.to_csv(inf_data_path, mode='a', header=not os.path.exists(inf_data_path))
 
