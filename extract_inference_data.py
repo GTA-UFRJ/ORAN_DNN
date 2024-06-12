@@ -117,7 +117,7 @@ if (__name__ == "__main__"):
 
 	parser.add_argument('--model_id', type=int, help='Model_id.')
 
-	parser.add_argument('--loss_weights_type', default="decrescent", type=str, help='loss_weights_type.')
+	parser.add_argument('--loss_weights_type', default="crescent", type=str, help='loss_weights_type.')
 
 
 	args = parser.parse_args()
