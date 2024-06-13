@@ -39,7 +39,8 @@ def main(args):
 	DIR_PATH = os.path.dirname(__file__)
 
 	device = torch.device('cuda' if (torch.cuda.is_available() and args.use_gpu) else 'cpu')
-		
+
+	print(device)		
 	inf_data_dir_path = os.path.join(DIR_PATH, "inf_data_results")
 	os.makedirs(inf_data_dir_path, exist_ok=True)
 
