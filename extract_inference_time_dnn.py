@@ -36,6 +36,8 @@ def extracting_inf_time(args, test_loader, model, device):
 
 def main(args):
 
+	DIR_PATH = os.path.dirname(__file__)
+
 	device = torch.device('cuda' if (torch.cuda.is_available() and args.use_gpu) else 'cpu')
 		
 	inf_data_dir_path = os.path.join(DIR_PATH, "inf_data_results")
