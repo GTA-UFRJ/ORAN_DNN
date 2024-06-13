@@ -73,6 +73,31 @@ class ConvModel(nn.Module):
             #print(x.shape)
         return x
 
+
+    def extractInfTime(self, x):
+        starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+
+        #This lines starts a timer to measure processing time
+        starter.record()
+
+        for layer in self.conv_layers:
+            x = layer(x)
+            #print(x.shape)
+
+        x = x.view(-1, 70)
+        #print(x.shape)
+
+        for linear_layer in self.line_layers:
+            x = linear_layer(x)
+            #print(x.shape)
+
+        ender.record()
+        torch.cuda.synchronize()
+        inf_time = starter.elapsed_time(ender)
+
+        return inf_time
+
+
         #return self.model(x)
 #x = torch.rand(1, 2, 20000)
 #model = ConvModel()(x)
