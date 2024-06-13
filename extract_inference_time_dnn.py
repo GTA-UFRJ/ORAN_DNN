@@ -54,7 +54,7 @@ def main(args):
 
 	df_inf_time = extracting_inf_time(args, test_loader, model, device)
 
-	df_inf_data.to_csv(inf_data_path, mode='a', header=not os.path.exists(inf_data_path))
+	df_inf_time.to_csv(inf_data_path, mode='a', header=not os.path.exists(inf_data_path))
 
 
 
