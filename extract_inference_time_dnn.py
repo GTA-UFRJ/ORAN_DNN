@@ -69,7 +69,7 @@ if (__name__ == "__main__"):
 	parser.add_argument('--model_name', type=str, default="cnn", 
 		choices=["cnn", "rn"], help='Model name.')
 
-	parser.add_argument('--use_gpu', type=bool, default=True, help='Use GPU? Default: True')
+	parser.add_argument('--use_gpu', type=bool, default=False, help='Use GPU? Default: True')
 
 	args = parser.parse_args()
 
