@@ -43,7 +43,7 @@ def main(args):
 	inf_data_dir_path = os.path.join(DIR_PATH, "inf_data_results")
 	os.makedirs(inf_data_dir_path, exist_ok=True)
 
-	inf_data_path = os.path.join(inf_data_dir_path, "inf_data_%s_%s.csv"%(args.model_name, args.loss_weights_type))
+	inf_data_path = os.path.join(inf_data_dir_path, "inf_data_%s.csv"%(args.model_name))
 
 	test_data = riq.IQDataset(data_folder="./oran_dataset", chunk_size=20000, stride=0, subset='test')
 	test_data.normalize(torch.tensor([-2.7671e-06, -7.3102e-07]), torch.tensor([0.0002, 0.0002]))
