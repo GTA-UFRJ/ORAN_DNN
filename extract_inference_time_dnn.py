@@ -23,7 +23,7 @@ def extracting_inf_time(args, test_loader, model, device):
 			inf_time_list.append(inf_time)
 
 
-	inf_time_list = np.array(cum_inf_time_list)
+	inf_time_list = np.array(inf_time_list)
 
 	result_dict = {"device": len(target_list)*[str(device)], "inf_time": inf_time_list}
 
