@@ -22,7 +22,6 @@ def extracting_inf_time(args, test_loader, model, device):
 
 			inf_time_list.append(inf_time)
 
-			print("Inference Time: %s"%(inf_time))
 
 	inf_time_list = np.array(cum_inf_time_list)
 
@@ -39,6 +38,11 @@ def main(args):
 
 	device = torch.device('cuda' if (torch.cuda.is_available() and args.use_gpu) else 'cpu')
 		
+	inf_data_dir_path = os.path.join(DIR_PATH, "inf_data_results")
+	os.makedirs(inf_data_dir_path, exist_ok=True)
+
+	inf_data_path = os.path.join(inf_data_dir_path, "inf_data_%s_%s.csv"%(args.model_name, args.loss_weights_type))
+
 	test_data = riq.IQDataset(data_folder="./oran_dataset", chunk_size=20000, stride=0, subset='test')
 	test_data.normalize(torch.tensor([-2.7671e-06, -7.3102e-07]), torch.tensor([0.0002, 0.0002]))
 	test_loader = torch.utils.data.DataLoader(test_data, batch_size=1, shuffle=False, num_workers=6, pin_memory=True)
@@ -48,7 +52,7 @@ def main(args):
 
 	df_inf_time = extracting_inf_time(args, test_loader, model, device)
 
-	#df_inf_data.to_csv(inf_data_path, mode='a', header=not os.path.exists(inf_data_path))
+	df_inf_data.to_csv(inf_data_path, mode='a', header=not os.path.exists(inf_data_path))
 
 
 
