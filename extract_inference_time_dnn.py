@@ -23,7 +23,6 @@ def extracting_inf_time(args, test_loader, model, device):
 			inf_time_list.append(inf_time)
 
 			print("Inference Time: %s"%(inf_time))
-			sys.exit()
 
 	inf_time_list = np.array(cum_inf_time_list)
 
