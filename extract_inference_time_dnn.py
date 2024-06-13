@@ -1,0 +1,82 @@
+import argparse, logging, os, torch, config, cnn_model
+from tqdm import tqdm
+import numpy as np
+import torch.nn as nn
+import pandas as pd
+import readCharmDataset as riq
+
+
+def extracting_ee_inference_data(args, test_loader, model, device):
+
+	model.eval()
+	with torch.no_grad():
+		for (data, target) in tqdm(test_loader):	
+
+			# Convert data and target into the current device.
+			data, target = data.to(device, non_blocking=True), target.to(device, non_blocking=True)
+
+			# Obtain confs and predictions for each side branch.
+			inf_time = model.extractInfTime(data)
+
+			inf_time_list.append(inf_time)
+
+			print("Inference Time: %s"%(inf_time))
+			break
+
+
+	conf_list, correct_list, delta_inf_time_list = np.array(conf_list), np.array(correct_list), np.array(delta_inf_time_list)
+	cum_inf_time_list, prediction_list = np.array(cum_inf_time_list), np.array(prediction_list)
+
+	accuracy_branches = [sum(correct_list[:, i])/len(correct_list[:, i]) for i in range(n_exits)]
+
+	print("Accuracy: %s"%(accuracy_branches))
+	
+	result_dict = {"device": len(target_list)*[str(device)], "target": target_list}
+
+	for i in range(n_exits):
+		result_dict["conf_branch_%s"%(i+1)] = conf_list[:, i]
+		result_dict["correct_branch_%s"%(i+1)] = correct_list[:, i]
+		result_dict["delta_inf_time_branch_%s"%(i+1)] = delta_inf_time_list[:, i]
+		result_dict["cum_inf_time_branch_%s"%(i+1)] = cum_inf_time_list[:, i]
+		result_dict["prediction_branch_%s"%(i+1)] = prediction_list[:, i]
+
+	#Converts to a DataFrame Format.
+	df = pd.DataFrame(np.array(list(result_dict.values())).T, columns=list(result_dict.keys()))
+
+	# Returns confidences and predictions into a DataFrame.
+	return df
+
+
+def main(args):
+
+	device = torch.device('cuda' if (torch.cuda.is_available() and args.use_gpu) else 'cpu')
+		
+	test_data = riq.IQDataset(data_folder="./oran_dataset", chunk_size=20000, stride=0, subset='test')
+	test_data.normalize(torch.tensor([-2.7671e-06, -7.3102e-07]), torch.tensor([0.0002, 0.0002]))
+	test_loader = torch.utils.data.DataLoader(test_data, batch_size=1, shuffle=False, num_workers=6, pin_memory=True)
+
+	model = cnn_model.ConvModel().to(device)
+
+
+	df_inf_time = extracting_ee_inf_time(args, test_loader, ee_model, device)
+
+	#df_inf_data.to_csv(inf_data_path, mode='a', header=not os.path.exists(inf_data_path))
+
+
+
+
+if (__name__ == "__main__"):
+	# Input Arguments to configure the early-exit model .
+	parser = argparse.ArgumentParser(description="Extract the confidences obtained by DNN inference for next experiments.")
+
+	#We here insert the argument dataset_name. 
+	#The initial idea is this novel calibration method evaluates three dataset for image classification: cifar10, cifar100 and
+	#caltech256. First, we implement caltech256 dataset.
+	parser.add_argument('--model_name', type=str, default="cnn", 
+		choices=["cnn", "rn"], help='Model name.')
+
+	parser.add_argument('--use_gpu', type=bool, default=True, help='Use GPU? Default: True')
+
+	args = parser.parse_args()
+
+	main(args)
