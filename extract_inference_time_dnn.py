@@ -25,7 +25,7 @@ def extracting_inf_time(args, test_loader, model, device):
 
 	inf_time_list = np.array(inf_time_list)
 
-	result_dict = {"device": len(target_list)*[str(device)], "inf_time": inf_time_list}
+	result_dict = {"device": len(inf_time_list)*[str(device)], "inf_time": inf_time_list}
 
 	#Converts to a DataFrame Format.
 	df = pd.DataFrame(np.array(list(result_dict.values())).T, columns=list(result_dict.keys()))
