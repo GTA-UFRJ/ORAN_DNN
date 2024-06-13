@@ -6,7 +6,9 @@ import pandas as pd
 import readCharmDataset as riq
 
 
-def extracting_ee_inference_data(args, test_loader, model, device):
+def extracting_inf_time(args, test_loader, model, device):
+
+	inf_time_list = []
 
 	model.eval()
 	with torch.no_grad():
@@ -21,24 +23,11 @@ def extracting_ee_inference_data(args, test_loader, model, device):
 			inf_time_list.append(inf_time)
 
 			print("Inference Time: %s"%(inf_time))
-			break
+			sys.exit()
 
+	inf_time_list = np.array(cum_inf_time_list)
 
-	conf_list, correct_list, delta_inf_time_list = np.array(conf_list), np.array(correct_list), np.array(delta_inf_time_list)
-	cum_inf_time_list, prediction_list = np.array(cum_inf_time_list), np.array(prediction_list)
-
-	accuracy_branches = [sum(correct_list[:, i])/len(correct_list[:, i]) for i in range(n_exits)]
-
-	print("Accuracy: %s"%(accuracy_branches))
-	
-	result_dict = {"device": len(target_list)*[str(device)], "target": target_list}
-
-	for i in range(n_exits):
-		result_dict["conf_branch_%s"%(i+1)] = conf_list[:, i]
-		result_dict["correct_branch_%s"%(i+1)] = correct_list[:, i]
-		result_dict["delta_inf_time_branch_%s"%(i+1)] = delta_inf_time_list[:, i]
-		result_dict["cum_inf_time_branch_%s"%(i+1)] = cum_inf_time_list[:, i]
-		result_dict["prediction_branch_%s"%(i+1)] = prediction_list[:, i]
+	result_dict = {"device": len(target_list)*[str(device)], "inf_time": inf_time_list}
 
 	#Converts to a DataFrame Format.
 	df = pd.DataFrame(np.array(list(result_dict.values())).T, columns=list(result_dict.keys()))
@@ -58,7 +47,7 @@ def main(args):
 	model = cnn_model.ConvModel().to(device)
 
 
-	df_inf_time = extracting_ee_inf_time(args, test_loader, ee_model, device)
+	df_inf_time = extracting_inf_time(args, test_loader, ee_model, device)
 
 	#df_inf_data.to_csv(inf_data_path, mode='a', header=not os.path.exists(inf_data_path))
 
