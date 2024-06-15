@@ -342,7 +342,7 @@ class Early_Exit_DNN(nn.Module):
 
       #This runs the early-exit classifications (prediction)
       output_branch = exitBlock(x)
-      flops += count_ops(exitBlock, x, print_readable=False, verbose=False)[0]
+      #flops += count_ops(exitBlock, x, print_readable=False, verbose=False)[0]
 
       flops_list.append(flops)
 
