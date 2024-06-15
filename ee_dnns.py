@@ -361,7 +361,7 @@ class Early_Exit_DNN(nn.Module):
       conf_branch, prediction = torch.max(self.softmax(output_branch), 1)
 
       #This apprends the gathered confidences and classifications into a list
-      output_list.append(output_branch), conf_list.append(conf_branch.item()), class_list.append(prediction), inf_time_list.append(curr_time)
+      output_list.append(output_branch), conf_list.append(conf_branch.item()), class_list.append(prediction)
 
 
     ee_branch.append(self.stages[-1])
