@@ -23,7 +23,7 @@ def extracting_ee_inference_data(args, test_loader, model, device):
 
 			print(data.shape)
 
-			macs, params = ptflops.get_model_complexity_info(model, (3, 32, 32), as_strings=False, print_per_layer_stat=False, verbose=False)
+			macs, params = ptflops.get_model_complexity_info(model, (2, 20000), as_strings=False, print_per_layer_stat=False, verbose=False)
 			flops_list.append(macs)
 
 	
