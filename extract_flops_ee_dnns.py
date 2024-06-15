@@ -4,6 +4,7 @@ import numpy as np
 import torch.nn as nn
 import pandas as pd
 import readCharmDataset as riq
+from pthflops import count_ops
 
 
 def extracting_ee_inference_data(args, test_loader, model, device):
