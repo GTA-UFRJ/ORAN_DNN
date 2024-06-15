@@ -5,7 +5,7 @@ import torch.nn as nn
 import pandas as pd
 import readCharmDataset as riq
 from pthflops import count_ops
-import pthflops
+import ptflops
 
 def extracting_ee_inference_data(args, test_loader, model, device):
 
@@ -20,8 +20,8 @@ def extracting_ee_inference_data(args, test_loader, model, device):
 			data, target = data.to(device, non_blocking=True), target.to(device, non_blocking=True)
 
 			# Obtain confs and predictions for each side branch.
-			flops, _ = pthflops.get_model_complexity_info(model, data, as_strings=False, print_per_layer_stat=False, verbose=False)
 
+            macs, params = ptflops.get_model_complexity_info(model, (3, 32, 32), as_strings=False, print_per_layer_stat=False, verbose=False)
 			flops_list.append(flops)
 
 	
