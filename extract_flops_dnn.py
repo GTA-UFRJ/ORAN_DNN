@@ -6,7 +6,7 @@ import pandas as pd
 import readCharmDataset as riq
 
 
-def extracting_inf_time(args, test_loader, model, device):
+def extracting_flops(args, test_loader, model, device):
 
 	flops_list = []
 
