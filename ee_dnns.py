@@ -157,7 +157,9 @@ class Early_Exit_DNN(nn.Module):
       #The prediction , a.k.a inference_class,  is the argmax output. 
       conf_branch, prediction = torch.max(self.softmax(output_branch), 1)
 
-      if(conf_branch.item() > self.threshold):
+      threshold_met = conf_branch > self.threshold
+
+      if(threshold_met.item()):
       	return output_branch, conf_branch, prediction
 
       #This apprends the gathered confidences and classifications into a list
