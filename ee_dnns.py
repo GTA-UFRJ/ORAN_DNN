@@ -319,9 +319,82 @@ class Early_Exit_DNN(nn.Module):
     return conf_list, class_list, inf_time_list, cumulative_inf_time_list, flops_branch_list, cumulative_total_flops_list
 
 
-
-
   def forwardFlops(self, x):
+    """
+    This method runs the DNN model during the training phase.
+    x (tensor): input image
+    """
+
+    output_list, conf_list, class_list, inf_time_list  = [], [], [], []
+    flops_branch_list, total_flops_list = [], []
+    starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+    cumulative_inf_time = 0.0
+
+    x_input = x
+
+    ee_branch = nn.ModuleList()
+
+    for i, exitBlock in enumerate(self.exits):
+
+      ee_branch.append(self.stages[i])
+      ee_branch.append(exitBlock)
+
+      flops_branch, _ = count_ops(nn.Sequential(*ee_branch), x_input, print_readable=False, verbose=False)
+
+      x_exit = self.stages[i](x)
+
+      flops_exit, _ = count_ops(exitBlock, x_exit, print_readable=False, verbose=False)
+
+      flops_branch_list.append(flops_branch)
+
+      del ee_branch[-1]
+
+      #This line process a DNN backbone until the (i+1)-th side branch (early-exit)
+      x = self.stages[i](x)
+
+      #This runs the early-exit classifications (prediction)
+      output_branch = exitBlock(x)
+
+      #This obtains the classification and confidence value in each side branch
+      #Confidence is the maximum probability of belongs one of the predefined classes
+      #The prediction , a.k.a inference_class,  is the argmax output. 
+      conf_branch, prediction = torch.max(self.softmax(output_branch), 1)
+
+      #This apprends the gathered confidences and classifications into a list
+      output_list.append(output_branch), conf_list.append(conf_branch.item()), class_list.append(prediction), inf_time_list.append(curr_time)
+
+
+    ee_branch.append(self.stages[-1])
+    ee_branch.append(nn.Flatten())
+    ee_branch.append(self.classifier)
+
+    flops_branch, _ = count_ops(nn.Sequential(*ee_branch), x_input, print_readable=False, verbose=False)
+    flops_backbone, _ = count_ops(self.stages[-1], x, print_readable=False, verbose=False)
+
+    x_exit = self.stages[-1](x)
+
+    x_exit = torch.flatten(x_exit, 1)
+
+    flops_exit, _ = count_ops(self.classifier, x_exit, print_readable=False, verbose=False)
+
+    flops_branch_list.append(flops_branch)
+
+    #This executes the last piece of DNN backbone
+    x = self.stages[-1](x)
+
+    x = torch.flatten(x, 1)
+
+    #This generates the last-layer classification
+    output = self.classifier(x)
+    infered_conf, infered_class = torch.max(self.softmax(output), 1)
+
+    output_list.append(output), conf_list.append(infered_conf.item()), class_list.append(infered_class)
+
+
+    return flops_branch_list
+
+
+  def forwardFlops2(self, x):
     """
     This method runs the DNN model during the training phase.
     x (tensor): input image
