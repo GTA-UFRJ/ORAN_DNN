@@ -334,13 +334,16 @@ class Early_Exit_DNN(nn.Module):
     for i, exitBlock in enumerate(self.exits):
 
       #This line process a DNN backbone until the (i+1)-th side branch (early-exit)
-      x = self.stages[i](x)
 
       flops += count_ops(self.stages[i], x, print_readable=False, verbose=False)
+
+      x = self.stages[i](x)
+
 
       #This runs the early-exit classifications (prediction)
       output_branch = exitBlock(x)
       flops += count_ops(exitBlock, x, print_readable=False, verbose=False)
+
       flops_list.append(flops)
 
       #This obtains the classification and confidence value in each side branch
@@ -352,10 +355,12 @@ class Early_Exit_DNN(nn.Module):
       output_list.append(output_branch), conf_list.append(conf_branch.item()), class_list.append(prediction)
 
 
+    flops += count_ops(self.stages[-1], x, print_readable=False, verbose=False)
+
+
     #This executes the last piece of DNN backbone
     x = self.stages[-1](x)
     
-    flops += count_ops(self.stages[-1], x, print_readable=False, verbose=False)
 
 
 
