@@ -65,7 +65,7 @@ class EarlyExitBlock(nn.Module):
 
 class Early_Exit_DNN(nn.Module):
   def __init__(self, model_name: str, n_classes: int, n_branches: int, 
-               exit_type: str, device, distribution="predefined", exit_positions=None):
+               exit_type: str, device, threshold, distribution="predefined", exit_positions=None):
     super(Early_Exit_DNN, self).__init__()
 
     self.model_name = model_name
@@ -75,6 +75,7 @@ class Early_Exit_DNN(nn.Module):
     self.distribution = distribution
     self.device = device
     self.exit_positions = exit_positions
+    self.threshold = threshold
     #input_ dim = torch.Size([batch_size, 2, 20000])
 
     build_early_exit_dnn = self.select_dnn_model()
@@ -135,6 +136,48 @@ class Early_Exit_DNN(nn.Module):
     self.softmax = nn.Softmax(dim=1)
 
 
+  def forward(self, x):
+    """
+    This method runs the DNN model during the training phase.
+    x (tensor): input image
+    """
+
+    output_list, conf_list, class_list  = [], [], []
+
+    for i, exitBlock in enumerate(self.exits):
+
+      #This line process a DNN backbone until the (i+1)-th side branch (early-exit)
+      x = self.stages[i](x)
+
+      #This runs the early-exit classifications (prediction)
+      output_branch = exitBlock(x)
+			
+      #This obtains the classification and confidence value in each side branch
+      #Confidence is the maximum probability of belongs one of the predefined classes
+      #The prediction , a.k.a inference_class,  is the argmax output. 
+      conf_branch, prediction = torch.max(self.softmax(output_branch), 1)
+
+      if(conf_branch.item() > self.threshold):
+      	return output_branch, conf_branch, prediction
+
+      #This apprends the gathered confidences and classifications into a list
+      output_list.append(output_branch), conf_list.append(conf_branch), class_list.append(prediction)
+
+    #This executes the last piece of DNN backbone
+    x = self.stages[-1](x)
+
+    x = torch.flatten(x, 1)
+
+    #This generates the last-layer classification
+    output = self.classifier(x)
+    infered_conf, infered_class = torch.max(self.softmax(output), 1)
+
+    output_list.append(output), conf_list.append(infered_conf), class_list.append(infered_class)
+
+    return output, infered_conf, infered_class
+
+
+
   def forwardTraining(self, x):
     """
     This method runs the DNN model during the training phase.
@@ -171,6 +214,8 @@ class Early_Exit_DNN(nn.Module):
     output_list.append(output), conf_list.append(infered_conf), class_list.append(infered_class)
 
     return output_list, conf_list, class_list
+
+
 
 
 
