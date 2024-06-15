@@ -335,14 +335,14 @@ class Early_Exit_DNN(nn.Module):
 
       #This line process a DNN backbone until the (i+1)-th side branch (early-exit)
 
-      flops += count_ops(self.stages[i], x, print_readable=False, verbose=False)
+      flops += count_ops(self.stages[i], x, print_readable=False, verbose=False)[0]
 
       x = self.stages[i](x)
 
 
       #This runs the early-exit classifications (prediction)
       output_branch = exitBlock(x)
-      flops += count_ops(exitBlock, x, print_readable=False, verbose=False)
+      flops += count_ops(exitBlock, x, print_readable=False, verbose=False)[0]
 
       flops_list.append(flops)
 
@@ -355,7 +355,7 @@ class Early_Exit_DNN(nn.Module):
       output_list.append(output_branch), conf_list.append(conf_branch.item()), class_list.append(prediction)
 
 
-    flops += count_ops(self.stages[-1], x, print_readable=False, verbose=False)
+    flops += count_ops(self.stages[-1], x, print_readable=False, verbose=False)[0]
 
 
     #This executes the last piece of DNN backbone
@@ -368,7 +368,7 @@ class Early_Exit_DNN(nn.Module):
 
     #This generates the last-layer classification
     output = self.classifier(x)
-    flops += count_ops(self.classifier, x, print_readable=False, verbose=False)
+    flops += count_ops(self.classifier, x, print_readable=False, verbose=False)[0]
 
     flops_list.append(flops)
 
