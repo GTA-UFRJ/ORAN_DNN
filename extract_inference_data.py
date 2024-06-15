@@ -11,6 +11,7 @@ def extracting_ee_inference_data(args, test_loader, model, device):
 	n_exits = args.n_branches + 1	
 	conf_list, correct_list, delta_inf_time_list, cum_inf_time_list = [], [], [], []
 	prediction_list, target_list = [], []
+	flops_branches_list, cum_flops_list = [], []
 
 	model.eval()
 	with torch.no_grad():
@@ -20,15 +21,18 @@ def extracting_ee_inference_data(args, test_loader, model, device):
 			data, target = data.to(device, non_blocking=True), target.to(device, non_blocking=True)
 
 			# Obtain confs and predictions for each side branch.
-			conf_branches, predictions_branches, delta_inf_time_branches, cum_inf_time_branches = model.forwardEval(data)
+			conf_branches, predictions_branches, delta_inf_time_branches, cum_inf_time_branches, flops_branches, cum_flops = model.forwardEval(data)
 
 			conf_list.append(conf_branches), delta_inf_time_list.append(delta_inf_time_branches), cum_inf_time_list.append(cum_inf_time_branches)
 
 			correct_list.append([predictions_branches[i].eq(target.view_as(predictions_branches[i])).sum().item() for i in range(n_exits)])
 			target_list.append(target.item()), prediction_list.append(([predictions_branches[i].item() for i in range(n_exits)]))
+			flops_branches_list.append(flops_branches), cum_flops_list.append(cum_flops)
 
 	conf_list, correct_list, delta_inf_time_list = np.array(conf_list), np.array(correct_list), np.array(delta_inf_time_list)
 	cum_inf_time_list, prediction_list = np.array(cum_inf_time_list), np.array(prediction_list)
+	
+	flops_branches_list, cum_flops_list = np.array(flops_branches_list), np.array(cum_flops_list)
 
 	accuracy_branches = [sum(correct_list[:, i])/len(correct_list[:, i]) for i in range(n_exits)]
 
@@ -42,6 +46,8 @@ def extracting_ee_inference_data(args, test_loader, model, device):
 		result_dict["delta_inf_time_branch_%s"%(i+1)] = delta_inf_time_list[:, i]
 		result_dict["cum_inf_time_branch_%s"%(i+1)] = cum_inf_time_list[:, i]
 		result_dict["prediction_branch_%s"%(i+1)] = prediction_list[:, i]
+		result_dict["flops_branch_%s"%(i+1)] = flops_branches_list[:, i]
+		result_dict["cum_flops_branch_%s"%(i+1)] = cum_flops_list[:, i]
 
 	#Converts to a DataFrame Format.
 	df = pd.DataFrame(np.array(list(result_dict.values())).T, columns=list(result_dict.keys()))

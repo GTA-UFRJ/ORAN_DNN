@@ -181,16 +181,30 @@ class Early_Exit_DNN(nn.Module):
     """
 
     output_list, conf_list, class_list, inf_time_list  = [], [], [], []
+    flops_branch_list, total_flops_list = [], []
     starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
     cumulative_inf_time = 0.0
 
+    x_input = x
+
+    ee_branch = nn.ModuleList()
 
     for i, exitBlock in enumerate(self.exits):
 
-      flops, all_data = count_ops(self.stages[i], x, print_readable=False, verbose=False)
+      ee_branch.append(self.stages[i])
+      ee_branch.append(exitBlock)
 
-      print(flops)
-      sys.exit()
+      flops_branch, _ = count_ops(nn.Sequential(*ee_branch), x_input, print_readable=False, verbose=False)
+
+	  flops_backbone, _ = count_ops(self.stages[i], x, print_readable=False, verbose=False)
+	  
+	  x_exit = self.stages[i](x)
+
+	  flops_exit = count_ops(exitBlock, x_exit, print_readable=False, verbose=False)
+
+      flops_branch_list.append(flops_branch), total_flops_list.append(flops_backbone+flops_exit)
+
+      del ee_branch[-1]
 
       #This lines starts a timer to measure processing time
       starter.record()
@@ -214,6 +228,23 @@ class Early_Exit_DNN(nn.Module):
       #This apprends the gathered confidences and classifications into a list
       output_list.append(output_branch), conf_list.append(conf_branch.item()), class_list.append(prediction), inf_time_list.append(curr_time)
 
+
+    ee_branch.append(self.stages[-1])
+    ee_branch.append(nn.Flatten())
+    ee_branch.append(self.classifier)
+
+    flops_branch, _ = count_ops(nn.Sequential(*ee_branch), x_input, print_readable=False, verbose=False)
+	flops_backbone, _ = count_ops(self.stages[-1], x, print_readable=False, verbose=False)
+
+	x_exit = self.stages[-1](x)
+
+	x_exit = torch.flatten(x_exit, 1)
+
+	flops_exit, _ = count_ops(self.classifier, x_exit, print_readable=False, verbose=False)
+
+	flops_branch_list.append(flops_branch), total_flops_list.append(flops_backbone+flops_exit)
+
+
     #This measures the processing time for the last piece of DNN backbone
     starter.record()
 
@@ -236,4 +267,6 @@ class Early_Exit_DNN(nn.Module):
 
     cumulative_inf_time_list = np.cumsum(inf_time_list)
 
-    return conf_list, class_list, inf_time_list, cumulative_inf_time_list
+    cumulative_total_flops_list = np.cumsum(total_flops_list)
+
+    return conf_list, class_list, inf_time_list, cumulative_inf_time_list, flops_branch_list, cumulative_total_flops_list
