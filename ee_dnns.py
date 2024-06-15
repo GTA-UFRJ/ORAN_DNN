@@ -200,7 +200,7 @@ class Early_Exit_DNN(nn.Module):
 
       x_exit = self.stages[i](x)
 
-      flops_exit = count_ops(exitBlock, x_exit, print_readable=False, verbose=False)
+      flops_exit, _ = count_ops(exitBlock, x_exit, print_readable=False, verbose=False)
 
       flops_branch_list.append(flops_branch), total_flops_list.append(flops_backbone+flops_exit)
 
