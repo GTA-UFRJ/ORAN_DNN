@@ -21,8 +21,8 @@ def extracting_ee_inference_data(args, test_loader, model, device):
 
 			# Obtain confs and predictions for each side branch.
 
-			macs, params = ptflops.get_model_complexity_info(model, (3, 32, 32), as_strings=False, print_per_layer_stat=False, verbose=False)
-			flops_list.append(flops)
+			macs, params = ptflops.get_model_complexity_info(model, data.shape, as_strings=False, print_per_layer_stat=False, verbose=False)
+			flops_list.append(macs)
 
 	
 	flops_list = np.array(flops_list)
