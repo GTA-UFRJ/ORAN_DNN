@@ -189,6 +189,9 @@ class Early_Exit_DNN(nn.Module):
 
       flops, all_data = count_ops(self.stages[i], x, print_readable=False, verbose=False)
 
+      print(flops)
+      sys.exit()
+
       #This lines starts a timer to measure processing time
       starter.record()
 
