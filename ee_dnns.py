@@ -317,3 +317,58 @@ class Early_Exit_DNN(nn.Module):
     cumulative_total_flops_list = np.cumsum(total_flops_list)
 
     return conf_list, class_list, inf_time_list, cumulative_inf_time_list, flops_branch_list, cumulative_total_flops_list
+
+
+
+
+  def forwardFlops(self, x):
+    """
+    This method runs the DNN model during the training phase.
+    x (tensor): input image
+    """
+
+    output_list, conf_list, class_list, inf_time_list  = [], [], [], []
+    flops = 0
+    flops_list = []
+
+    for i, exitBlock in enumerate(self.exits):
+
+      #This line process a DNN backbone until the (i+1)-th side branch (early-exit)
+      x = self.stages[i](x)
+
+      flops += count_ops(self.stages[i], x, print_readable=False, verbose=False)
+
+      #This runs the early-exit classifications (prediction)
+      output_branch = exitBlock(x)
+      flops += count_ops(exitBlock, x, print_readable=False, verbose=False)
+      flops_list.append(flops)
+
+      #This obtains the classification and confidence value in each side branch
+      #Confidence is the maximum probability of belongs one of the predefined classes
+      #The prediction , a.k.a inference_class,  is the argmax output. 
+      conf_branch, prediction = torch.max(self.softmax(output_branch), 1)
+
+      #This apprends the gathered confidences and classifications into a list
+      output_list.append(output_branch), conf_list.append(conf_branch.item()), class_list.append(prediction)
+
+
+    #This executes the last piece of DNN backbone
+    x = self.stages[-1](x)
+    
+    flops += count_ops(self.stages[-1], x, print_readable=False, verbose=False)
+
+
+
+    x = torch.flatten(x, 1)
+
+    #This generates the last-layer classification
+    output = self.classifier(x)
+    flops += count_ops(self.classifier, x, print_readable=False, verbose=False)
+
+    flops_list.append(flops)
+
+    infered_conf, infered_class = torch.max(self.softmax(output), 1)
+
+    output_list.append(output), conf_list.append(infered_conf.item()), class_list.append(infered_class), inf_time_list.append(curr_time)
+
+    return flops_list
