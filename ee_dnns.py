@@ -196,11 +196,11 @@ class Early_Exit_DNN(nn.Module):
 
       flops_branch, _ = count_ops(nn.Sequential(*ee_branch), x_input, print_readable=False, verbose=False)
 
-	  flops_backbone, _ = count_ops(self.stages[i], x, print_readable=False, verbose=False)
-	  
-	  x_exit = self.stages[i](x)
+      flops_backbone, _ = count_ops(self.stages[i], x, print_readable=False, verbose=False)
 
-	  flops_exit = count_ops(exitBlock, x_exit, print_readable=False, verbose=False)
+      x_exit = self.stages[i](x)
+
+      flops_exit = count_ops(exitBlock, x_exit, print_readable=False, verbose=False)
 
       flops_branch_list.append(flops_branch), total_flops_list.append(flops_backbone+flops_exit)
 
@@ -214,7 +214,7 @@ class Early_Exit_DNN(nn.Module):
 
       #This runs the early-exit classifications (prediction)
       output_branch = exitBlock(x)
-			
+
       #This obtains the classification and confidence value in each side branch
       #Confidence is the maximum probability of belongs one of the predefined classes
       #The prediction , a.k.a inference_class,  is the argmax output. 
@@ -234,15 +234,15 @@ class Early_Exit_DNN(nn.Module):
     ee_branch.append(self.classifier)
 
     flops_branch, _ = count_ops(nn.Sequential(*ee_branch), x_input, print_readable=False, verbose=False)
-	flops_backbone, _ = count_ops(self.stages[-1], x, print_readable=False, verbose=False)
+    flops_backbone, _ = count_ops(self.stages[-1], x, print_readable=False, verbose=False)
 
-	x_exit = self.stages[-1](x)
+    x_exit = self.stages[-1](x)
 
-	x_exit = torch.flatten(x_exit, 1)
+    x_exit = torch.flatten(x_exit, 1)
 
-	flops_exit, _ = count_ops(self.classifier, x_exit, print_readable=False, verbose=False)
+    flops_exit, _ = count_ops(self.classifier, x_exit, print_readable=False, verbose=False)
 
-	flops_branch_list.append(flops_branch), total_flops_list.append(flops_backbone+flops_exit)
+    flops_branch_list.append(flops_branch), total_flops_list.append(flops_backbone+flops_exit)
 
 
     #This measures the processing time for the last piece of DNN backbone
