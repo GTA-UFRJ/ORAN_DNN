@@ -187,6 +187,8 @@ class Early_Exit_DNN(nn.Module):
 
     for i, exitBlock in enumerate(self.exits):
 
+      flops, all_data = count_ops(self.stages[i], x, print_readable=False, verbose=False)
+
       #This lines starts a timer to measure processing time
       starter.record()
 
