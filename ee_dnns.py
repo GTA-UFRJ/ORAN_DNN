@@ -410,6 +410,7 @@ class Early_Exit_DNN(nn.Module):
       #This line process a DNN backbone until the (i+1)-th side branch (early-exit)
 
       flops += count_ops(self.stages[i], x, print_readable=False, verbose=False)[0]
+      print(flops)
 
       x = self.stages[i](x)
 
@@ -418,6 +419,7 @@ class Early_Exit_DNN(nn.Module):
       output_branch = exitBlock(x)
       #if(i==1):
       flops += count_ops(exitBlock, x, print_readable=False, verbose=False)[0]
+      print(flops)
 
       flops_list.append(flops)
 
@@ -445,9 +447,12 @@ class Early_Exit_DNN(nn.Module):
     output = self.classifier(x)
     flops += count_ops(self.classifier, x, print_readable=False, verbose=False)[0]
 
+    print(flops)
+
     flops_list.append(flops)
 
     infered_conf, infered_class = torch.max(self.softmax(output), 1)
 
     output_list.append(output), conf_list.append(infered_conf.item()), class_list.append(infered_class)
+    sys.exit()
     return flops_list
