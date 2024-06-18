@@ -319,7 +319,7 @@ class Early_Exit_DNN(nn.Module):
     return conf_list, class_list, inf_time_list, cumulative_inf_time_list, flops_branch_list, cumulative_total_flops_list
 
 
-  def forwardFlops(self, x):
+  def forwardFlops2(self, x):
     """
     This method runs the DNN model during the training phase.
     x (tensor): input image
@@ -364,6 +364,7 @@ class Early_Exit_DNN(nn.Module):
       output_list.append(output_branch), conf_list.append(conf_branch.item()), class_list.append(prediction)
 
 
+
     ee_branch.append(self.stages[-1])
     ee_branch.append(nn.Flatten())
     ee_branch.append(self.classifier)
@@ -394,7 +395,7 @@ class Early_Exit_DNN(nn.Module):
     return flops_branch_list
 
 
-  def forwardFlops2(self, x):
+  def forwardFlops(self, x):
     """
     This method runs the DNN model during the training phase.
     x (tensor): input image
@@ -415,8 +416,8 @@ class Early_Exit_DNN(nn.Module):
 
       #This runs the early-exit classifications (prediction)
       output_branch = exitBlock(x)
-      if(i==1):
-        flops += count_ops(exitBlock, x, print_readable=False, verbose=False)[0]
+      #if(i==1):
+      flops += count_ops(exitBlock, x, print_readable=False, verbose=False)[0]
 
       flops_list.append(flops)
 
