@@ -23,6 +23,7 @@ def extracting_ee_inference_data(args, test_loader, model, device):
 
 			flops = model.forwardFlops(data)
 			print(flops)
+			sys.exit()
 			flops_list.append(flops)
 
 	

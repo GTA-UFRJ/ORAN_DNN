@@ -454,5 +454,5 @@ class Early_Exit_DNN(nn.Module):
     infered_conf, infered_class = torch.max(self.softmax(output), 1)
 
     output_list.append(output), conf_list.append(infered_conf.item()), class_list.append(infered_class)
-    sys.exit()
+    #sys.exit()
     return flops_list
