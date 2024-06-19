@@ -65,7 +65,7 @@ class EarlyExitBlock(nn.Module):
 
 class Early_Exit_DNN(nn.Module):
   def __init__(self, model_name: str, n_classes: int, n_branches: int, 
-               exit_type: str, device, threshold, distribution="predefined", exit_positions=None):
+               exit_type: str, device, distribution="predefined", exit_positions=None):
     super(Early_Exit_DNN, self).__init__()
 
     self.model_name = model_name
@@ -75,7 +75,7 @@ class Early_Exit_DNN(nn.Module):
     self.distribution = distribution
     self.device = device
     self.exit_positions = exit_positions
-    self.threshold = threshold
+    #self.threshold = threshold
     #input_ dim = torch.Size([batch_size, 2, 20000])
 
     build_early_exit_dnn = self.select_dnn_model()
