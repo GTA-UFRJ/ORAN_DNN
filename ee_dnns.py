@@ -236,6 +236,9 @@ class Early_Exit_DNN(nn.Module):
 
     ee_branch = nn.ModuleList()
 
+    print(self.stages[0])
+    sys.exit()
+
     for i, exitBlock in enumerate(self.exits):
 
       ee_branch.append(self.stages[i])
