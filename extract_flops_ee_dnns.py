@@ -31,9 +31,13 @@ def extracting_ee_inference_data(args, test_loader, model, device):
 	flops_list = np.array(flops_list)
 
 	
-	result_dict = {"flops": flops_list}
+	result_dict = {}
 
 	#print("Flops: %s"%(flops_list.mean()))
+
+	for i in range(n_exits):
+		result_dict["flops_branch_%s"%(i+1)] = flops_branches_list[:, i]
+
 
 	#Converts to a DataFrame Format.
 	df = pd.DataFrame(np.array(list(result_dict.values())).T, columns=list(result_dict.keys()))
