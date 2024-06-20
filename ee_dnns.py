@@ -218,9 +218,6 @@ class Early_Exit_DNN(nn.Module):
     return output_list, conf_list, class_list
 
 
-
-
-
   def forwardEval(self, x):
     """
     This method runs the DNN model during the training phase.
@@ -413,7 +410,7 @@ class Early_Exit_DNN(nn.Module):
       #This line process a DNN backbone until the (i+1)-th side branch (early-exit)
 
       flops += count_ops(self.stages[i], x, print_readable=False, verbose=False)[0]
-      print(flops)
+      #print(flops)
 
       x = self.stages[i](x)
 
@@ -422,7 +419,7 @@ class Early_Exit_DNN(nn.Module):
       output_branch = exitBlock(x)
       #if(i==1):
       flops += count_ops(exitBlock, x, print_readable=False, verbose=False)[0]
-      print(flops)
+      #print(flops)
 
       flops_list.append(flops)
 
@@ -450,7 +447,7 @@ class Early_Exit_DNN(nn.Module):
     output = self.classifier(x)
     flops += count_ops(self.classifier, x, print_readable=False, verbose=False)[0]
 
-    print(flops)
+    #print(flops)
 
     flops_list.append(flops)
 

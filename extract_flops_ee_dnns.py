@@ -22,8 +22,6 @@ def extracting_ee_inference_data(args, test_loader, model, device):
 			# Obtain confs and predictions for each side branch.
 
 			flops = model.forwardFlops(data)
-			print(flops)
-			sys.exit()
 			flops_list.append(flops)
 
 	
@@ -32,7 +30,7 @@ def extracting_ee_inference_data(args, test_loader, model, device):
 	
 	result_dict = {"device": len(flops_list)*[str(device)], "flops": flops_list}
 
-	print("Flops: %s"%(flops_list.mean()))
+	#print("Flops: %s"%(flops_list.mean()))
 
 	#Converts to a DataFrame Format.
 	df = pd.DataFrame(np.array(list(result_dict.values())).T, columns=list(result_dict.keys()))
@@ -40,10 +38,10 @@ def extracting_ee_inference_data(args, test_loader, model, device):
 	# Returns confidences and predictions into a DataFrame.
 	return df
 
-def load_eednn_model(args, n_classes, model_path, device, threshold):
+def load_eednn_model(args, n_classes, model_path, device):
 
 	#Instantiate the Early-exit DNN model.
-	ee_model = ee_dnns.Early_Exit_DNN(args.model_name, 3, args.n_branches, args.exit_type, device, threshold, exit_positions=config.exit_positions)    
+	ee_model = ee_dnns.Early_Exit_DNN(args.model_name, 3, args.n_branches, args.exit_type, device, exit_positions=config.exit_positions)    
 
 	#Load the trained early-exit DNN model.
 	ee_model.load_state_dict(torch.load(model_path, map_location=device)["model_state_dict"])
@@ -65,21 +63,17 @@ def main(args):
 	inf_data_dir_path = os.path.join(DIR_PATH, "inf_data_results")
 	os.makedirs(inf_data_dir_path, exist_ok=True)
 
-	inf_data_path = os.path.join(inf_data_dir_path, "flops_inf_data_ee_%s_%s.csv"%(args.model_name, args.loss_weights_type))
+	inf_data_path = os.path.join(inf_data_dir_path, "flops_inf_data_ee_%s_%s_final.csv"%(args.model_name, args.loss_weights_type))
 		
 	test_data = riq.IQDataset(data_folder="./oran_dataset", chunk_size=20000, stride=0, subset='validation')
 	test_data.normalize(torch.tensor([-2.7671e-06, -7.3102e-07]), torch.tensor([0.0002, 0.0002]))
 	test_loader = torch.utils.data.DataLoader(test_data, batch_size=1, shuffle=False, num_workers=6, pin_memory=True)
 
+	ee_model = load_eednn_model(args, 3, model_path, device)
 
-	threshold_list = [0, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+	df_inf_data = extracting_ee_inference_data(args, test_loader, ee_model, device)
 
-	for threshold in threshold_list:
-		ee_model = load_eednn_model(args, 3, model_path, device, threshold)
-
-		df_inf_data = extracting_ee_inference_data(args, test_loader, ee_model, device)
-
-		df_inf_data.to_csv(inf_data_path, mode='a', header=not os.path.exists(inf_data_path))
+	df_inf_data.to_csv(inf_data_path, mode='a', header=not os.path.exists(inf_data_path))
 
 
 
