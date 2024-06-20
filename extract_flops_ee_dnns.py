@@ -22,6 +22,8 @@ def extracting_ee_inference_data(args, test_loader, model, device):
 			# Obtain confs and predictions for each side branch.
 
 			flops = model.forwardFlops(data)
+			print(flops)
+			sys.exit()
 			flops_list.append(flops)
 
 	
