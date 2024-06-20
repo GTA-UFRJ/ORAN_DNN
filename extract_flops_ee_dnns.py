@@ -25,12 +25,13 @@ def extracting_ee_inference_data(args, test_loader, model, device):
 			#print(flops)
 			#sys.exit()
 			flops_list.append(flops)
+			break
 
 	
 	flops_list = np.array(flops_list)
 
 	
-	result_dict = {"device": len(flops_list)*[str(device)], "flops": flops_list}
+	result_dict = {"flops": flops_list}
 
 	#print("Flops: %s"%(flops_list.mean()))
 
