@@ -22,8 +22,8 @@ def extracting_ee_inference_data(args, test_loader, model, device):
 			# Obtain confs and predictions for each side branch.
 
 			flops = model.forwardFlops(data)
-			print(flops)
-			sys.exit()
+			#print(flops)
+			#sys.exit()
 			flops_list.append(flops)
 
 	
@@ -56,7 +56,7 @@ def main(args):
 	#n_classes = config.n_class_dict[args.dataset_name]
 	DIR_PATH = os.path.dirname(__file__)
 
-	device = torch.device('cuda' if (torch.cuda.is_available() and args.use_gpu) else 'cpu')
+	device = torch.device('cuda')
 
 	model_path = os.path.join(DIR_PATH, "models", "%s_model_%s_full.pt"%(args.model_name, args.loss_weights_type))
 
